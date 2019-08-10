@@ -1,0 +1,41 @@
+public class StudentController 
+
+{
+
+   @RemoteAction
+    public static List<SelectOption> getList()
+    {
+      List<SelectOption> options = new List<SelectOption>();
+            
+       Schema.DescribeFieldResult fieldResult = candidate__C.Type__c.getDescribe();
+       List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
+            
+       for( Schema.PicklistEntry f : ple)
+       {
+          options.add(new SelectOption(f.getLabel(), f.getValue()));
+       }       
+       return options;
+    }
+    
+   @RemoteAction
+    public static Boolean getsendingData(string Namee, string Typee){
+        boolean response=false;
+        candidate__c ras=new candidate__c();
+        ras.Name=Namee;
+        ras.type__c=Typee;
+        try{
+            insert ras;
+            response=true;
+            
+        } 
+        catch(exception e){
+             response=false;
+            system.debug('error'+e);
+        }
+  
+        return response;
+        
+    }
+    
+
+}
