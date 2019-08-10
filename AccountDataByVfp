@@ -1,0 +1,42 @@
+Apex
+public class FilterDropdown {
+    
+    public List<Account> AccountTemp = new List<Account>();
+    public FilterDropdown()
+    {
+        
+    }
+    
+    public List<SelectOption> Accountlist
+    {
+        get
+        {
+            AccountTemp = [Select BillingCity,BillingStreet,BillingCountry from Account];
+            
+            Accountlist = new List<SelectOption>();
+            
+            for(Account Acc : AccountTemp)
+            {
+                Accountlist.add(new SelectOption(Acc.BillingCity, Acc.BillingStreet));
+            }
+            return Accountlist;
+        }
+        set;
+    }
+}
+
+
+
+
+
+
+Visual force
+<apex:page controller="FilterDropdown">
+    
+    
+    <apex:form >
+        <apex:selectList size="10">
+            <apex:selectOptions value="{!Accountlist}"></apex:selectOptions>
+        </apex:selectList>
+    </apex:form>
+    </apex:page>
