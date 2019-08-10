@@ -1,0 +1,86 @@
+Apex
+
+public  class contactController {
+    public integer offSet{get;set;}
+    public integer limitSize{get;set;}
+    public integer totalrecords{get;set;}
+    
+    public contactController()
+    {
+        totalrecords=[select count() from Contact];
+        this.limitSize=5;
+        this.offSet=0;
+    }
+    public List<Contact> getcontact_list() 
+    {
+       List<Contact> conresults = [Select  FirstName, LastName,Title,Email from Contact limit:5 OFFSET:offset];
+       return conresults;
+        
+    }
+    
+    public void first()
+    {
+        offset=0;
+    }
+     public void next()
+    {
+        offset+=limitSize;
+    }
+    public void previous()
+    {
+        offset-=limitSize;
+    }
+    public void last()
+    {
+         offset=totalrecords-Math.mod(totalrecords, limitSize);
+    }
+   
+    
+      public boolean getprev()
+    {
+        if(offset==0)
+            return true;
+        else
+            return false;
+    }
+    
+      public boolean getnxt()
+    {
+       if((offset+limitsize)+1>totalrecords)
+           return true;
+        else
+            return false;
+    }
+}
+
+
+
+VFP
+
+<apex:page Controller="contactController" >
+<apex:pageBlock title="Viewing Contact">
+    <apex:form id="theForm">
+        <apex:pageBlockSection title="Total records are">
+            <apex:outputText value="{!totalrecords}"></apex:outputText>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection >
+            
+        <apex:pageBlockTable value="{!contact_list}" var="conn">
+             <apex:column value="{!conn.FirstName}" headerValue="First name"/>
+            <apex:column value=" {!conn.LastName}" headerValue="Last name"/>
+             <apex:column value=" {!conn.Title}" headerValue="Title "/>
+            <apex:column value="{!conn.Email}" headerValue="Email"/>
+                     
+            </apex:pageBlockTable>
+  </apex:pageBlockSection>
+    <apex:panelGrid columns="10">
+      <apex:commandButton reRender="theForm" action="{!first}" disabled="{!prev}" value="First"></apex:commandButton>
+        <apex:commandButton reRender="theForm" action="{!next}" disabled="{!nxt}" value="NEXT"></apex:commandButton>
+      <apex:commandButton reRender="theForm" action="{!previous}" disabled="{!prev}" value="PREVIOUS"></apex:commandButton>
+      <apex:commandButton reRender="theForm" action="{!last}" disabled="{!nxt}" value="LAST"></apex:commandButton>
+    </apex:panelGrid>
+        <apex:outputText value="{!offSet+1}-{!offSet+5}$$"></apex:outputText>
+
+  </apex:form>
+</apex:pageBlock>
+</apex:page>
