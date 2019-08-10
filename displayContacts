@@ -1,0 +1,143 @@
+<!--
+  @Page Name          : displayContacts.page
+  @Description        : 
+  @Author             : Rasagna Varma 
+  @Group              : 
+  @Last Modified By   : Rasagna Varma 
+ 
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      	     Modification
+  ==============================================================================
+ n
+-->
+<apex:page controller="showContacts" >
+    <apex:pageBlock id="showstate">
+    <apex:form id="FormId">
+        <apex:pageBlockSection >
+            <apex:outputText value="Total Records:{!TotalRecords}"></apex:outputText><br/>
+        </apex:pageBlockSection>
+        <apex:outputPanel rendered="{! IF(Retrievingcontacts.size>0,true,false)}">
+            <apex:pageBlockTable value="{!Retrievingcontacts}" var="a"  >
+                <apex:column value="{!a.FirstName}"  />
+                <apex:column value="{!a.LastName}"/>
+                <apex:column value="{!a.Email}"/>
+            </apex:pageBlockTable>
+        </apex:outputPanel>
+        
+        <apex:outputPanel rendered="{! IF(Retrievingcontacts.size==0,true,false)}">
+           No Contacts Found
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{! IF(Retrievingaccounts.size>0,true,false)}">
+            <apex:pageBlockTable value="{!Retrievingaccounts}" var="ac">
+                <apex:column value="{!ac.Name}" />
+                <apex:column value="{!ac.Phone}" />
+            </apex:pageBlockTable>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{! IF(Retrievingaccounts.size==0,true,false)}">
+            No Accounts Found
+        </apex:outputPanel>
+           <apex:outputText value="{!Counter+1} - {! endCounter} " style="display:none;"></apex:outputText>
+        <apex:repeat var="pageNum" value="{!pNumList}">
+            <apex:outputPanel onclick="methodOneInJavascript('{!pageNum}')" styleClass="btn">
+                {!pageNum}
+            </apex:outputPanel>
+        </apex:repeat>
+         <apex:actionFunction action="{!goToPage}" name="methodOneInJavascript" rerender="showstate">
+            <apex:param name="firstParam" assignTo="{!pageNumber}" value="" />
+        </apex:actionFunction>
+        </apex:form>
+        </apex:pageBlock>
+</apex:page>
+
+
+
+
+APX
+
+/**
+ * @File Name          : showContacts.cls
+ * @Description        : 
+ * @Author             : Rasagna Varma 
+ * @Group              : 
+ * @Last Modified By   : Rasagna Varma 
+
+ * @Modification Log   : 
+ *==============================================================================
+ * Ver         Date                     Author      	     Modification
+ *==============================================================================
+
+**/
+public with sharing class showContacts {
+   public Integer LimitSize{ get; set;}
+    public  Integer Counter{get;set;}
+    public  Integer endCounter{get;set;}
+    public Integer TotalRecords{get;set;}
+    public Integer pageNumber{ get; set;}
+    public List<Integer> pNumList{get;set;}
+    public ShowContacts(){
+        TotalRecords=[Select count() from contact];
+        this.LimitSize=5;
+        pageNumber=0;
+        Integer quat = Integer.valueOf(TotalRecords/LimitSize);
+        quat++;
+        pNumList = new List<Integer>();
+        for(Integer i=1;i<=quat;i++){
+            pNumList.add(i);
+        }
+        this.Counter=0;
+        this.endCounter=5;
+    }
+  public void goToPage(){
+        if(pageNumber>0){
+            pageNumber--;
+        }
+        Counter=pageNumber*LimitSize;
+    }
+    public  List<Contact>  getRetrievingcontacts(){
+            List<Contact> cooo=Database.query(
+            'SELECT FirstName, LastName, Email, phone , Acount.Name,Acount.Phone FROM Contact ORDER BY FirstName Asc   LIMIT '+LimitSize+' OFFSET '+Counter);
+                
+            return cooo;
+    }
+    public List<Account> getRetrievingaccounts(){
+        List<Account> acc=[select Name,Phone from Account Limit:Limitsize OFFSET:Counter ];
+        return acc;
+    }
+    public void First(){
+        Counter=0;
+        endCounter=5;
+    }
+    public void Last(){
+        Counter=TotalRecords-math.mod(TotalRecords,LimitSize);
+        endCounter=TotalRecords;
+    }
+    public void Previous(){
+        Counter-=LimitSize;
+        endCounter=Counter+LimitSize;
+    }
+    public void Next(){
+        Counter+=LimitSize;
+        if(Counter+LimitSize>=TotalRecords){
+            endCounter=TotalRecords;
+        }else{
+            endCounter=Counter+LimitSize;
+        }
+    }
+     public boolean getprev()
+    {
+        if(Counter==0)
+            return true;
+        else
+            return false;
+    }
+   
+      public boolean getnxt()
+    {
+       if((Counter+limitSize)+1>Totalrecords)
+           return true;
+        else
+            return false;
+    }
+    
+}
