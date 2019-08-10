@@ -1,0 +1,62 @@
+<apex:page standardController="Account" extensions="AccountContactdisp" >
+    <apex:form >
+        <apex:pageBlock id="Refresh">
+            <apex:pageBlockTable var="apxretr" value="{!Retrive}" >
+                <apex:column >
+                <apex:commandLink value="Delete" action="{!DelButton}" reRender="Refresh">
+                    <apex:param value="{!apxretr.Id}" name="Retrid" assignTo="{! RetriveContactId}"/>
+                </apex:commandLink>
+                </apex:column>
+                <apex:column >
+                <apex:commandLink value="Remove" action="{!removeButton}" reRender="Refresh">
+                    <apex:param value="{!apxretr.Id}" name="Retasrid" assignTo="{! RetriveContactId}"/>
+                </apex:commandLink>
+                </apex:column>
+                <apex:column Value="{!apxretr.Name}"/>
+                <apex:column Value="{!apxretr.Email}"/>
+                <apex:column Value="{!apxretr.Id}"/>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:form> 
+</apex:page>
+
+
+
+
+
+APex
+
+
+public with sharing class AccountContactdisp {
+    public list<contact> Retrive{get;set;}
+    public Account RetriveAcc{get;set;}
+    public String RetriveContactId{get;set;}
+    public String RetriveAccId{get;set;}
+    public AccountContactdisp(Apexpages.StandardController apxpages){
+        RetriveAcc=(Account)apxpages.getRecord();
+        Retrive=[select Name, Email, AccountId, Id from Contact Where AccountId=:RetriveAcc.Id];
+    }
+    
+     public AccountContactdisp(){
+      
+        Retrive=[select Name, Email, Id from Contact Where AccountId=:RetriveAcc.Id];
+    }
+    
+    Public Void DelButton(){
+        system.debug('print'+RetriveContactId);
+       	list<contact> ContactList=[Select Id from contact where Id=:RetriveContactId limit 1];
+        delete ContactList;
+        Retrive=[select Name, Email, Id from Contact Where AccountId=:RetriveAcc.Id];
+    } 
+    Public Void removeButton(){
+        
+       	contact Con=[Select Id,AccountId from contact where Id=:RetriveContactId limit 1];
+Con.AccountId =null;
+        update con;
+       //Con=[Select Id,AccountId from contact where Id=:RetriveContactId limit 1];
+        //update ContactList1;
+       Retrive=[select Name, Email, Id from Contact Where AccountId=:RetriveAcc.Id];
+    }    
+    
+
+}
