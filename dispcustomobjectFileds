@@ -22,9 +22,7 @@ VFP
                             // tab.push(result[i].Name,result[i].type__c);
                         }
                         $('#Print').html(tab);
-                        
-                        
-                        
+
                     }, 
                     {escape: true}
                 );
@@ -73,7 +71,8 @@ VFP
             }
             function canceling(){
                 $("#hi").hide();
-                
+             $('#text-input-id-1').val('')
+			$('#select-01').val('None');
                 
             }
             function clicking(){
@@ -84,26 +83,20 @@ VFP
                 }
                 else if(typestr=='None'){
                     alert("Fill type");
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
+                  
                 }
                     else{
-                        canceling();
                         sendData();
+              $('#text-input-id-1').val('')
+			$('#select-01').val('None');
+                        canceling();
+
                         
                     }
-                
-            }
+ 
+            } 
+            
+           
             </script>
         </head>
         <body>
@@ -187,7 +180,6 @@ VFP
     
     
 </apex:page>
-
 
 
 
