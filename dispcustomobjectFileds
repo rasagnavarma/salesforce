@@ -8,6 +8,7 @@ VFP
             <apex:slds />
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
             </script>
+            <!--to display data in table and for loop for dynamic retrive data-->
             <script>
             
             function display(){
@@ -22,12 +23,15 @@ VFP
                             // tab.push(result[i].Name,result[i].type__c);
                         }
                         $('#Print').html(tab);
-
+                        
                     }, 
                     {escape: true}
                 );
                 
             }
+            
+            //open popup and onclick function what to do
+            
             $(document).ready(function(){
                 $("#open").click(function(){
                     $("#hi").toggle();
@@ -35,6 +39,8 @@ VFP
                 getPickListVal();
                 display();
             });
+            
+            // for sending data from modal to org
             function sendData(){
                 var stor=$("#text-input-id-1").val();
                 var typestr=$("#select-01").val();
@@ -42,14 +48,26 @@ VFP
                     '{!$RemoteAction.StudentController.getsendingData}',
                     stor,typestr,                    
                     function(result, event){
-                        alert(result);
-                        if(result){
+                        
+                        if(result==true){
                             display();
-                        }else{
+                            $('#sucessalert').show();
+                            setTimeout(function(){
+                                $('#sucessalert').hide();
+                            }, 5000);
                             
+                            
+                            
+                            
+                        }else{
+                            $('#failalert').show();
+                            setTimeout(function(){
+                                $('#failalert').hide();
+                            }, 5000);
                         }
                     });
             };
+            //this is for geting the picklist values from org and apex has loop
             function getPickListVal() {                
                 Visualforce.remoting.Manager.invokeAction(
                     '{!$RemoteAction.StudentController.getList}',
@@ -69,42 +87,191 @@ VFP
                     {escape: true}
                 );
             }
+            
+            // on clicking cancel this will trigger
             function canceling(){
                 $("#hi").hide();
-             $('#text-input-id-1').val('')
-			$('#select-01').val('None');
+                $('#text-input-id-1').val('')
+                $('#select-01').val('None');
                 
             }
+            //this is for alerts if name and validations
             function clicking(){
                 var stor=$("#text-input-id-1").val();
                 var typestr=$("#select-01").val();
                 if(stor==''){
                     alert("Fill name");
+                    
+                    
+                    
                 }
                 else if(typestr=='None'){
                     alert("Fill type");
-                  
+                    
+                    
+                    
                 }
                     else{
                         sendData();
-              $('#text-input-id-1').val('')
-			$('#select-01').val('None');
-                        canceling();
-
+                        $('#text-input-id-1').val('')
+                        $('#select-01').val('None');
+                        canceling(); 
                         
                     }
- 
+                
             } 
             
-           
+            
             </script>
+            
         </head>
         <body>
-            <button id="open" class="slds-button slds-button_success" >New</button>
-            <div>
-                <table class="slds-table slds-table_bordered slds-table_fixed-layout slds-table_resizable-cols">
-                    <thead>
+            
+            <!--success alert-->
+            
+            
+            
+            <div class="slds-notify_container " style="height:4rem; display:none;" id="sucessalert">
+                <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
+                    <span class="slds-assistive-text"></span>
+                    <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+                        <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                            <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#success"></use>
+                        </svg>
+                    </span>
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small "></h2>
+                        <h1>
+                            
+                            Candidate was Sucessfully added</h1>
+                    </div>
+                    <div class="slds-notify__close">
+                        <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Close">
+                            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                            </svg>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            
+            <!--fail alert-->
+            <div class="slds-notify_container " style="height:4rem; display:none;" id="failalert">
+                <div class="slds-notify slds-notify_toast slds-theme_error" role="hide">
+                    <span class="slds-assistive-text">error</span>
+                    <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+                        <svg class="slds-icon slds-icon_small" aria-hidden="false">
+                            <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#error"></use>
+                        </svg>
+                    </span>
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small">Oops...! something went wrong</h2>
+                        <p>Please check the code</p>
                         
+                    </div>
+                    <div class="slds-notify__close">
+                        <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Close">
+                            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                            </svg>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <!--Page header this is for the header -->
+            <div class="slds-page-header">
+                <div class="slds-page-header__row">
+                    <div class="slds-page-header__col-title">
+                        <div class="slds-media">
+                            <div class="slds-media__figure">
+                                <span class="slds-icon_container slds-icon-standard-opportunity">
+                                    <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
+                                        <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#account')}"></use>
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="slds-media__body">
+                                <div class="slds-page-header__name">
+                                    <div class="slds-page-header__name-title">
+                                        <h1>
+                                            <h1>candidate</h1>
+                                            
+                                        </h1>
+                                    </div>
+                                    <div class="slds-page-header__name-switcher">
+                                        <div class="slds-dropdown-trigger slds-dropdown-trigger_click">
+                                            <button class="slds-button slds-button_icon slds-button_icon-small" aria-haspopup="true" title="Switch list view">
+                                                <svg class="slds-button__icon slds-icon_x-small" aria-hidden="true">
+                                                    <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#down"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Switch list view</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-page-header__col-actions">
+                        
+                        <div class="slds-page-header__control">
+                            <ul class="slds-button-group-list">
+                                <li>
+                                    <button id="open" class="slds-button slds-button_neutral" >New</button>
+                                </li>
+                                <li>
+                                    
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-page-header__row">
+                <div class="slds-page-header__col-meta">
+                    <p class="slds-page-header__meta-text"></p>
+                </div>
+                <div class="slds-page-header__col-controls">
+                    <div class="slds-page-header__controls">
+                        <div class="slds-page-header__control">
+                            <div class="slds-dropdown-trigger slds-dropdown-trigger_click">
+                            </div>
+                        </div>
+                        <div class="slds-page-header__control">
+                            <div class="slds-dropdown-trigger slds-dropdown-trigger_click">
+                                
+                            </div>
+                        </div>
+                        <div class="slds-page-header__control">
+                            
+                        </div>
+                        <div class="slds-page-header__control">
+                            
+                        </div>
+                        <div class="slds-page-header__control">
+                            <ul class="slds-button-group-list">
+                                <li>
+                                    
+                                </li>
+                                <li>
+                                    
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Table to display data-->
+            <div>
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                    <thead>
                         <tr>
                             <th>
                                 Name
@@ -116,15 +283,12 @@ VFP
                                 Action
                             </th>
                         </tr>
-                        
                     </thead>
-                    
-                    
                     <tbody id= "Print">
-                        
                     </tbody>
                 </table>
             </div>
+            <!--modal popup-->
             <div >
                 <div id="hi" style="height:640px; display: none;">
                     <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
@@ -174,13 +338,11 @@ VFP
             </div>
             
             
-            
         </body>
     </html>
     
     
 </apex:page>
-
 
 
 Apex
