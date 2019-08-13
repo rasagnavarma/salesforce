@@ -18,9 +18,9 @@ VFP
                         var tab= '';
                         
                         for(i=0;i<result.length;i++){
-                            //tab+='<tr>''<td>'+result[i]+'</td>''</tr>';
+                            
                             tab+= '<tr><td>'+result[i].Name+'</td><td>'+result[i].type__c+'</td><td></td></tr>';
-                            // tab.push(result[i].Name,result[i].type__c);
+                            
                         }
                         $('#Print').html(tab);
                         
@@ -136,7 +136,7 @@ VFP
                     <span class="slds-assistive-text"></span>
                     <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
                         <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                            <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#success"></use>
+                            <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#approval"></use>
                         </svg>
                     </span>
                     <div class="slds-notify__content">
@@ -286,6 +286,7 @@ VFP
                     </thead>
                     <tbody id= "Print">
                     </tbody>
+                   
                 </table>
             </div>
             <!--modal popup-->
@@ -296,7 +297,7 @@ VFP
                             <header class="slds-modal__header">
                                 <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
                                     <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                                        <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                                        <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#close"></use>
                                     </svg>
                                     <span class="slds-assistive-text">Close</span>
                                 </button>
@@ -336,6 +337,33 @@ VFP
                     <div class="slds-backdrop slds-backdrop_open"></div>
                 </div>
             </div>
+            
+            
+            
+       <div class="slds-dropdown-trigger  slds-is-open" id= "editanddel">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" aria-haspopup="true" title="Show More">
+                    <svg class="slds-button__icon" aria-hidden="true">
+                        <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#down"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Show More</span>
+                </button>
+                <div class="slds-dropdown slds-dropdown_left">
+                    <ul class="slds-dropdown__list" role="menu" aria-label="Show More">
+                        <li class="slds-dropdown__item" role="presentation">
+                            <a href="javascript:void(0);" role="menuitem" tabindex="0">
+                                <span class="slds-truncate" title="Menu Item One">Edit</span>
+                            </a>
+                        </li>
+                        <li class="slds-dropdown__item" role="presentation">
+                            <a href="javascript:void(0);" role="menuitem" tabindex="-1">
+                                <span class="slds-truncate" title="Menu Item Two">Delete</span>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div> 
+            
             
             
         </body>
