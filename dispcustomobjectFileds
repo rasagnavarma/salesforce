@@ -19,7 +19,31 @@ VFP
                         
                         for(i=0;i<result.length;i++){
                             
-                            tab+= '<tr><td>'+result[i].Name+'</td><td>'+result[i].type__c+'</td><td></td></tr>';
+                            tab+= '<tr><td>'+result[i].Name+'</td><td>'+result[i].type__c+'</td><td>'
+                            +' <div class="slds-dropdown-trigger  slds-is-open" id= "editanddel">'
+                            +'   <button class="slds-button slds-button_icon slds-button_icon-border-filled" aria-haspopup="true" title="Show More">'
+                            +'     <svg class="slds-button__icon" aria-hidden="true">'
+                            +'       <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}">'
+                            +'</use>'
+                            +'     </svg>'
+                            +'   <span class="slds-assistive-text"></span>'
+                            +' </button>'
+                            +'<div class="slds-dropdown slds-dropdown_left">'
+                            +'  <ul class="slds-dropdown__list" role="menu">'
+                            +'    <li class="slds-dropdown__item" role="presentation">'
+                            +'      <a href="javascript:void(0);" role="menuitem" tabindex="0">'
+                            +'        <span class="slds-truncate" onclick="popModal()" title="Menu Item One">Edit</span>'
+                            +'      </a>'
+                            +'    </li>'
+                            +'  <li class="slds-dropdown__item" role="presentation">'
+                            +'    <a href="javascript:void(0);" role="menuitem" tabindex="-1">'
+                            +'      <span class="slds-truncate" title="Menu Item Two">Delete</span>'
+                            +'    </a>'
+                            +'  </li>'
+                            
+                            +'</ul>'
+                            +'</div>'
+                            +'</div></td></tr>';
                             
                         }
                         $('#Print').html(tab);
@@ -33,12 +57,15 @@ VFP
             //open popup and onclick function what to do
             
             $(document).ready(function(){
-                $("#open").click(function(){
-                    $("#hi").toggle();
-                });                
+                
                 getPickListVal();
                 display();
             });
+            function popModal(){
+                $("#ModalId").show();
+                
+                
+            }
             
             // for sending data from modal to org
             function sendData(){
@@ -90,7 +117,7 @@ VFP
             
             // on clicking cancel this will trigger
             function canceling(){
-                $("#hi").hide();
+                $("#ModalId").hide();
                 $('#text-input-id-1').val('')
                 $('#select-01').val('None');
                 
@@ -136,7 +163,7 @@ VFP
                     <span class="slds-assistive-text"></span>
                     <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
                         <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                            <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#approval"></use>
+                            <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/action-sprite/svg/symbols.svg#approval')}"></use>
                         </svg>
                     </span>
                     <div class="slds-notify__content">
@@ -176,7 +203,7 @@ VFP
                     <div class="slds-notify__close">
                         <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Close">
                             <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                                <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                                <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
                             </svg>
                             <span class="slds-assistive-text">Close</span>
                         </button>
@@ -224,7 +251,7 @@ VFP
                         <div class="slds-page-header__control">
                             <ul class="slds-button-group-list">
                                 <li>
-                                    <button id="open" class="slds-button slds-button_neutral" >New</button>
+                                    <button onclick="popModal()" class="slds-button slds-button_neutral" >New</button>
                                 </li>
                                 <li>
                                     
@@ -286,12 +313,12 @@ VFP
                     </thead>
                     <tbody id= "Print">
                     </tbody>
-                   
+                    
                 </table>
             </div>
             <!--modal popup-->
             <div >
-                <div id="hi" style="height:640px; display: none;">
+                <div id="ModalId" style="height:640px; display: none;">
                     <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                         <div class="slds-modal__container">
                             <header class="slds-modal__header">
@@ -340,38 +367,33 @@ VFP
             
             
             
-       <div class="slds-dropdown-trigger  slds-is-open" id= "editanddel">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" aria-haspopup="true" title="Show More">
-                    <svg class="slds-button__icon" aria-hidden="true">
-                        <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#down"></use>
-                    </svg>
-                    <span class="slds-assistive-text">Show More</span>
-                </button>
-                <div class="slds-dropdown slds-dropdown_left">
-                    <ul class="slds-dropdown__list" role="menu" aria-label="Show More">
-                        <li class="slds-dropdown__item" role="presentation">
-                            <a href="javascript:void(0);" role="menuitem" tabindex="0">
-                                <span class="slds-truncate" title="Menu Item One">Edit</span>
-                            </a>
-                        </li>
-                        <li class="slds-dropdown__item" role="presentation">
-                            <a href="javascript:void(0);" role="menuitem" tabindex="-1">
-                                <span class="slds-truncate" title="Menu Item Two">Delete</span>
-                            </a>
-                        </li>
-                        
-                    </ul>
-                </div>
-            </div> 
-            
-            
+            <!-- <div class="slds-dropdown-trigger  slds-is-open" id= "editanddel">
+<button class="slds-button slds-button_icon slds-button_icon-border-filled" aria-haspopup="true" title="Show More">
+<svg class="slds-button__icon" aria-hidden="true">
+<use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#down"></use>
+</svg>
+<span class="slds-assistive-text">Show More</span>
+</button>
+<div class="slds-dropdown slds-dropdown_left">
+<ul class="slds-dropdown__list" role="menu" aria-label="Show More">
+<li class="slds-dropdown__item" role="presentation">
+<a href="javascript:void(0);" role="menuitem" tabindex="0">
+<span class="slds-truncate" title="Menu Item One">Edit</span>
+</a>
+</li>
+<li class="slds-dropdown__item" role="presentation">
+<a href="javascript:void(0);" role="menuitem" tabindex="-1">
+<span class="slds-truncate" title="Menu Item Two">Delete</span>
+</a>
+</li>
+
+</ul>
+</div>
+</div> -->
             
         </body>
     </html>
-    
-    
 </apex:page>
-
 
 Apex
 
