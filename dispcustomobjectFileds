@@ -13,13 +13,13 @@ VFP
             
             function display(){
                 Visualforce.remoting.Manager.invokeAction(
-                    '{!$RemoteAction.StudentController.display}',
+                    '{!$RemoteAction.StudentController.getdisplay}',
                     function(result, event){
                         var tab= '';
                         
                         for(i=0;i<result.length;i++){
                             
-                            tab+= '<tr><td>'+result[i].Name+'</td><td>'+result[i].type__c+'</td><td>'
+                            tab+= '<tr><td id="raga-'+result[i].Id+'">'+result[i].Name+'</td><td>'+result[i].type__c+'</td><td>'
                             +' <div class="slds-dropdown-trigger  slds-is-open" id= "editanddel">'
                             +'   <button class="slds-button slds-button_icon slds-button_icon-border-filled" aria-haspopup="true" title="Show More">'
                             +'     <svg class="slds-button__icon" aria-hidden="true">'
@@ -32,12 +32,12 @@ VFP
                             +'  <ul class="slds-dropdown__list" role="menu">'
                             +'    <li class="slds-dropdown__item" role="presentation">'
                             +'      <a href="javascript:void(0);" role="menuitem" tabindex="0">'
-                            +'        <span class="slds-truncate" onclick="popModal()" title="Menu Item One">Edit</span>'
+                            +'        <span class="slds-truncate" onclick=editModal("'+result[i].Name+'","'+result[i].type__c+'","'+result[i].Id+'") title="Menu Item One">Edit</span>'
                             +'      </a>'
                             +'    </li>'
                             +'  <li class="slds-dropdown__item" role="presentation">'
                             +'    <a href="javascript:void(0);" role="menuitem" tabindex="-1">'
-                            +'      <span class="slds-truncate" title="Menu Item Two">Delete</span>'
+                            +'      <span class="slds-truncate" id="delbtn" onclick="shoedelModal(\''+result[i].Id+'\')" title="Menu Item Two">Delete</span>'
                             +'    </a>'
                             +'  </li>'
                             
@@ -61,11 +61,37 @@ VFP
                 getPickListVal();
                 display();
             });
+            // on clicking new this will help to show save button and hide update button
+            
             function popModal(){
                 $("#ModalId").show();
-                
+                $("#updateBtn").hide();
+                $("#name").show();
                 
             }
+            // on clicking editbutton this will help to hide save button and show update button
+            
+            function editModal(names,types,id){
+                $("#updateBtn").show();
+                $("#name").hide();
+                $('#text-input-id-1').val(names);
+                $('#select-01').val(types);
+                $("#ModalId").show();
+                $("#updateBtn").attr('onClick','updateValues("'+id+'")');
+                console.log(names,types,id);
+            }
+            
+            jQuery(document).mouseup(function(e){
+                $("#updateBtn").click(function(){
+                    $("#ModalId").hide();
+                    display();
+                    
+                });
+            });
+                        
+            
+            
+            
             
             // for sending data from modal to org
             function sendData(){
@@ -77,8 +103,11 @@ VFP
                     function(result, event){
                         
                         if(result==true){
+                            $("#ModalId").hide();
                             display();
                             $('#sucessalert').show();
+                            $('#toastId').addClass('slds-theme_success');
+                            $('#tostMsgId').html('succesfully added');
                             setTimeout(function(){
                                 $('#sucessalert').hide();
                             }, 5000);
@@ -87,9 +116,11 @@ VFP
                             
                             
                         }else{
-                            $('#failalert').show();
+                            $('#sucessalert').show();
+                            $('#toastId').addClass('slds-theme_error');
+                            $('#tostMsgId').html('Uncessfull of records adding please check It');
                             setTimeout(function(){
-                                $('#failalert').hide();
+                                $('#sucessalert').hide();
                             }, 5000);
                         }
                     });
@@ -115,6 +146,22 @@ VFP
                 );
             }
             
+            //onclick for delete function
+            
+            function deletecontact(id) {    
+                
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.StudentController.getdeleteFun}',id,
+                    function(result, event)
+                    {
+                        display();
+                        $("#deleteModal").hide();
+                        
+                    },
+                    {escape: true}
+                );
+            }
+            
             // on clicking cancel this will trigger
             function canceling(){
                 $("#ModalId").hide();
@@ -127,16 +174,23 @@ VFP
                 var stor=$("#text-input-id-1").val();
                 var typestr=$("#select-01").val();
                 if(stor==''){
-                    alert("Fill name");
+                    $('#sucessalert').show();
+                    $('#toastId').addClass('slds-theme_error');
+                    $('#tostMsgId').html('Fill the name');
+                    setTimeout(function(){
+                        $('#sucessalert').hide();
+                    }, 5000);
                     
                     
                     
                 }
                 else if(typestr=='None'){
-                    alert("Fill type");
-                    
-                    
-                    
+                    $('#sucessalert').show();
+                    $('#toastId').addClass('slds-theme_error');
+                    $('#tostMsgId').html('Fill the type');
+                    setTimeout(function(){
+                        $('#sucessalert').hide();
+                    }, 5000);
                 }
                     else{
                         sendData();
@@ -147,8 +201,34 @@ VFP
                     }
                 
             } 
+            function updateValues(id){
+                var namess=$("#text-input-id-1").val();
+                var typess=$("#select-01").val();
+                //var ids=$("#text-input-id-1").Id;
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.StudentController.getupdateFun}',
+                    namess,typess,id, 
+                    function(result, event){
+                        });
+            };
             
             
+            
+            function hidedelModal(){
+                $("#deleteModal").hide();
+            }
+            function shoedelModal(id){
+                $("#deleteModal").show();
+                $('#deleteBtn').attr('onClick','deletecontact("'+id+'")');
+            }
+            //close alert by clicking x button
+            function closealert(){
+                $('#sucessalert').hide();
+            }
+            //close model by clicking x button
+            function closeBtnModal(){
+                $('#ModalId').hide();
+            }
             </script>
             
         </head>
@@ -156,52 +236,20 @@ VFP
             
             <!--success alert-->
             
-            
-            
             <div class="slds-notify_container " style="height:4rem; display:none;" id="sucessalert">
-                <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
+                <div class="slds-notify slds-notify_toast " role="status" id="toastId">
                     <span class="slds-assistive-text"></span>
-                    <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+                    <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top"  title="Description of icon when needed">
                         <svg class="slds-icon slds-icon_small" aria-hidden="true">
                             <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/action-sprite/svg/symbols.svg#approval')}"></use>
                         </svg>
                     </span>
-                    <div class="slds-notify__content">
-                        <h2 class="slds-text-heading_small "></h2>
-                        <h1>
-                            
-                            Candidate was Sucessfully added</h1>
-                    </div>
-                    <div class="slds-notify__close">
-                        <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Close">
-                            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                                <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
-                            </svg>
-                            <span class="slds-assistive-text">Close</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            
-            
-            
-            <!--fail alert-->
-            <div class="slds-notify_container " style="height:4rem; display:none;" id="failalert">
-                <div class="slds-notify slds-notify_toast slds-theme_error" role="hide">
-                    <span class="slds-assistive-text">error</span>
-                    <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
-                        <svg class="slds-icon slds-icon_small" aria-hidden="false">
-                            <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#error"></use>
-                        </svg>
-                    </span>
-                    <div class="slds-notify__content">
-                        <h2 class="slds-text-heading_small">Oops...! something went wrong</h2>
-                        <p>Please check the code</p>
+                    <div class="slds-notify__content" id="tostMsgId">
+                        
                         
                     </div>
                     <div class="slds-notify__close">
-                        <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Close">
+                        <button class="slds-button slds-button_icon slds-button_icon-inverse" onclick="closealert()" title="Close" >
                             <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
                                 <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
                             </svg>
@@ -210,6 +258,9 @@ VFP
                     </div>
                 </div>
             </div>
+            
+            
+            
             
             
             <!--Page header this is for the header -->
@@ -236,7 +287,7 @@ VFP
                                         <div class="slds-dropdown-trigger slds-dropdown-trigger_click">
                                             <button class="slds-button slds-button_icon slds-button_icon-small" aria-haspopup="true" title="Switch list view">
                                                 <svg class="slds-button__icon slds-icon_x-small" aria-hidden="true">
-                                                    <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#down"></use>
+                                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}"></use>
                                                 </svg>
                                                 <span class="slds-assistive-text">Switch list view</span>
                                             </button>
@@ -280,7 +331,7 @@ VFP
                             
                         </div>
                         <div class="slds-page-header__control">
-                            
+             
                         </div>
                         <div class="slds-page-header__control">
                             <ul class="slds-button-group-list">
@@ -297,7 +348,7 @@ VFP
             </div>
             <!--Table to display data-->
             <div>
-                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped"  id= "Print1">
                     <thead>
                         <tr>
                             <th>
@@ -322,9 +373,9 @@ VFP
                     <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                         <div class="slds-modal__container">
                             <header class="slds-modal__header">
-                                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="closeBtnModal()" title="Close">
                                     <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                                        <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#close"></use>
+                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
                                     </svg>
                                     <span class="slds-assistive-text">Close</span>
                                 </button>
@@ -356,6 +407,7 @@ VFP
                                 </div>
                             </div>
                             <footer class="slds-modal__footer">
+                                <button class="slds-button slds-button_success" id="updateBtn" onclick="updateValues()">Update</button>
                                 <button class="slds-button slds-button_success" id="name" onclick="clicking()">Save</button>
                                 <button class="slds-button slds-button_neutral" onclick="canceling()">Cancel</button>
                             </footer>
@@ -366,34 +418,32 @@ VFP
             </div>
             
             
-            
-            <!-- <div class="slds-dropdown-trigger  slds-is-open" id= "editanddel">
-<button class="slds-button slds-button_icon slds-button_icon-border-filled" aria-haspopup="true" title="Show More">
-<svg class="slds-button__icon" aria-hidden="true">
-<use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#down"></use>
-</svg>
-<span class="slds-assistive-text">Show More</span>
-</button>
-<div class="slds-dropdown slds-dropdown_left">
-<ul class="slds-dropdown__list" role="menu" aria-label="Show More">
-<li class="slds-dropdown__item" role="presentation">
-<a href="javascript:void(0);" role="menuitem" tabindex="0">
-<span class="slds-truncate" title="Menu Item One">Edit</span>
-</a>
-</li>
-<li class="slds-dropdown__item" role="presentation">
-<a href="javascript:void(0);" role="menuitem" tabindex="-1">
-<span class="slds-truncate" title="Menu Item Two">Delete</span>
-</a>
-</li>
-
-</ul>
-</div>
-</div> -->
-            
+            <div id="deleteModal" style="height:640px;display:none;">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container" >
+                        <header class="slds-modal__header">
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Deleting Contact</h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            <div class="slds-form-element" id="MyForm" style="Text-align:center;">
+                                <label class="slds-form-element__label " for="text-input-id-1" >Are You sure?</label>
+                            </div>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button class="slds-button slds-button_neutral" onclick="hidedelModal()">Cancel</button>
+                            <button id="deleteBtn" class="slds-button slds-button_brand" onclick="deletecontact()">Delete</button>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </div>
         </body>
     </html>
 </apex:page>
+
+
+
+
 
 Apex
 
@@ -402,31 +452,44 @@ Apex
 public class StudentController 
 
 {
-    
-       @RemoteAction
-    Public static list <candidate__c> display(){
+    @RemoteAction
+    Public static list <candidate__c> getdisplay(){
         list<candidate__c> show = [select name,type__c from candidate__c];
         return show;
-
+        
     } 
-            
-            
-   @RemoteAction
+    
+    @RemoteAction
     public static List<SelectOption> getList()
     {
-      List<SelectOption> options = new List<SelectOption>();
-            
-       Schema.DescribeFieldResult fieldResult = candidate__C.Type__c.getDescribe();
-       List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
-            
-       for( Schema.PicklistEntry f : ple)
-       {
-          options.add(new SelectOption(f.getLabel(), f.getValue()));
-       }       
-       return options;
+        List<SelectOption> options = new List<SelectOption>();
+        
+        Schema.DescribeFieldResult fieldResult = candidate__C.Type__c.getDescribe();
+        List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
+        
+        for( Schema.PicklistEntry f : ple)
+        {
+            options.add(new SelectOption(f.getLabel(), f.getValue()));
+        }       
+        return options;
     }
     
-   @RemoteAction
+    @RemoteAction
+    Public static list <candidate__c> getdeleteFun(string canId){
+        list<candidate__c> deleteFun1 = [select name,type__c from candidate__c where Id=:canId];
+        delete deleteFun1;
+        return deleteFun1;
+    }
+    
+    @RemoteAction
+    Public static candidate__c getupdateFun(string namee,string typee, string id){
+        candidate__c edit=[select Name, type__c from candidate__c where id=: id];
+        edit.Name=namee;
+        edit.type__c=typee;
+        update edit;
+        return edit;
+    }
+    @RemoteAction
     public static Boolean getsendingData(string Namee, string Typee){
         boolean response=false;
         candidate__c ras=new candidate__c();
@@ -438,13 +501,11 @@ public class StudentController
             
         } 
         catch(exception e){
-             response=false;
+            response=false;
             system.debug('error'+e);
         }
-  
+        
         return response;
         
     }
-    
-
 }
