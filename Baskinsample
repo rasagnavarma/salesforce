@@ -1,0 +1,477 @@
+vfp
+
+<apex:page controller="BaskinController">
+    
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+            <apex:includeScript value="/soap/ajax/36.0/connection.js"/>
+            <apex:slds />
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+            </script>
+            <script>
+            function showModal()
+            {
+                
+                $("#ModalPop").show();
+                $("#saveBtn").show();
+                $("#updateBtn").hide();
+                
+                clearData();
+                
+            }
+            
+            
+            
+            function clearData()
+            {
+                $("#text-input-id-1").val(''); 
+                $("#select-01").val("None"); 
+            }
+            function hideModalPop()
+            {
+                $("#ModalPop").hide();
+            }
+            
+            </script>
+            <script>
+            function getFlavours()
+            {
+                
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.BaskinController.getFlavours}',
+                    function(result, event){
+                        if(event.status)
+                        {
+                            
+                            var sel='<option value="None">None</option>';
+                            for(i=0;i<result.length;i++)
+                            {
+                                sel+='<option value="'+result[i]+'">'+result[i]+'</option>';
+                            }
+                            $('#select-01').html(sel);
+                        }
+                        
+                    }, 
+                    {escape: true}
+                );
+            }
+            
+            
+            
+            $(document).ready(function(){
+                getFlavours();
+                displayRecords();
+                
+            });
+            function tostClose(){
+                $("#sucessalert").hide();
+            }
+            function deletepopClose()
+            {
+                $("#DeleteModalpop").hide();
+            }
+            function deleteRecords(Id)
+            {
+                
+                $("#DeleteModalpop").hide();
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.BaskinController.getDeleteRecord}',Id,
+                    function(result, event)
+                    {
+                        if(event.status)
+                        {
+                            console.log("deleted");
+                            
+                            displayRecords();
+                            $('#sucessalert').show();
+                            $('#toastId').addClass('slds-theme_success');
+                            $('#tostMsgId').html('succesfully deleted');
+                            setTimeout(function(){
+                                $('#sucessalert').hide();
+                            }, 5000);
+                            
+                            
+                        }
+                    },
+                    {escape: true}
+                    
+                );
+            }
+            function shoedelModal(id){
+                $("#DeleteModalpop").show();
+                $('#dltbtn').attr('onClick','deleteRecords("'+id+'")');
+                
+            }
+            
+            
+            function saveRecord()
+            {
+                var name=$("#text-input-id-1").val();  
+                name=$.trim(name);
+                var falv= $("#select-01").val();
+                if(name=='' )
+                    
+                {
+                    $('#sucessalert').show();
+                    $('#toastId').addClass('slds-theme_error');
+                    $('#tostMsgId').html('please enter the name');
+                    setTimeout(function(){
+                        $('#sucessalert').hide();
+                    }, 5000);
+                    
+                }
+                else if(falv=='None')
+                {
+                    $('#sucessalert').show();
+                    $('#toastId').addClass('slds-theme_error');
+                    $('#tostMsgId').html('please enter the flavour');
+                    setTimeout(function(){
+                        $('#sucessalert').hide();
+                    }, 5000);
+                    
+                }
+                
+                    else 
+                    {
+                        
+                        Visualforce.remoting.Manager.invokeAction(
+                            '{!$RemoteAction.BaskinController.insertingNew}',name,falv,
+                            function(result, event)
+                            {
+                                if(event.status)
+                                {
+                                    console.log("updated");
+                                    hideModalPop();
+                                    displayRecords();
+                                    
+                                    
+                                    
+                                    
+                                }
+                                
+                                $('#sucessalert').show();
+                                $('#toastId').removeClass('slds-theme_error');
+                                $('#toastId').addClass('slds-theme_success');
+                                $('#tostMsgId').html('succesfully added records');
+                                setTimeout(function(){
+                                    $('#sucessalert').hide();
+                                }, 5000);
+                            },
+                            {escape: true}
+                            
+                        );
+                    }
+                
+            }
+            
+            
+            function editModal(id)
+            {
+                var name=$("#text-input-id-1").val(); 
+               var flavour= $("#select-01").val();
+                var baskinId= id.split(',');
+                    
+                
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.BaskinController.getEditList}',name,flavour,baskinId[2],
+                    function(result, event){
+                        if(event.status)
+                        {
+                            
+                        }
+                        
+                    }, 
+                    {escape: true}
+                ); $("#ModalPop").hide();
+                displayRecords();
+            }
+            
+            function showEditModal(name,flavour,id)
+            {
+                $("#ModalPop").show();
+                clearData();
+                $("#updateBtn").show();
+                $("#saveBtn").hide();
+                $("#text-input-id-1").val(name); 
+                $("#select-01").val(flavour);
+                $('#updateBtn').attr('onClick','editModal("'+name+','+flavour+','+id+'")');
+                
+            }
+            
+            
+            function displayRecords()
+            {
+                
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.BaskinController.getDisplayList}',
+                    function(result, event){
+                        
+                        if(event.status)
+                        {
+                            var appending='';
+                            for(i=0;i<result.length;i++)
+                            {
+                                appending+= '<tr><td id="'+result[i].Id+'">'+result[i].Name+'</td><td>'+result[i].Flavour__c+'</td><td>' 
+                                +' <div class="slds-dropdown-trigger " aria-expanded="true">'
+                                +'   <button class="slds-button slds-button--icon-border-filled" aria-haspopup="true">'
+                                +'    <svg aria-hidden="true" class="slds-button__icon slds-button__icon--hint">'
+                                +'     <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}">'
+                                +'</use>'
+                                +'    </svg>'
+                                +'  <span class="slds-assistive-text">Show More</span>'
+                                +'</button>'
+                                +'<div class="slds-dropdown slds-dropdown--left">'
+                                +'  <ul class="dropdown__list" role="menu">'
+                                +'    <li class="slds-dropdown__item">'
+                                +'      <a href="#void" role="menuitem">'
+                                +'        <p class="slds-truncate" id="editbtn" onclick=showEditModal("'+result[i].Name+'","'+result[i].Flavour__c+'","'+result[i].Id+'")>Edit</p>'
+                                +'      </a>'
+                                +'    </li>'
+                                +'  <li class="slds-dropdown__item">'
+                                +'    <a href="#void" role="menuitem">'
+                                +'      <p class="slds-truncate" id="deletebtn" onclick="shoedelModal(\''+result[i].Id+'\')">Delete</p>'
+                                +'    </a>'
+                                +'  </li>'
+                                +'</ul>'
+                                +'</div>'
+                                +'</div>'
+                                +'</td></tr>';
+                                
+                            }
+                        }$("#tableBody").html(appending);
+                        
+                    }, 
+                    {escape: true}
+                );
+                
+            }
+            
+            </script>
+            
+        </head>
+        <body>
+            
+            
+            <div class="slds-notify_container " style="height:4rem; display:none;"  id="sucessalert">
+                <div class="slds-notify slds-notify_toast" id="toastId" role="status">
+                    <span class="slds-assistive-text">success</span>
+                    <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+                        <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                            <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#success')}"></use>
+                        </svg>
+                    </span>
+                    <div class="slds-notify__content" id="tostMsgId">
+                        <h2 class="slds-text-heading_small ">
+                            <a href="javascript:void(0);"></a> </h2>
+                    </div>
+                    <div class="slds-notify__close">
+                        <button class="slds-button slds-button_icon slds-button_icon-inverse" onclick="tostClose()" title="Close">
+                            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use> 
+                            </svg>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            
+            
+            <div class="slds-page-header">
+                <div class="slds-page-header__row">
+                    <div class="slds-page-header__col-title">
+                        <div class="slds-media">
+                            <div class="slds-media__figure">
+                                
+                                <apex:image id="theImage" width="50" height="50" value="{!IMAGEPROXYURL('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Baskin-Robbins_logo.svg/1024px-Baskin-Robbins_logo.svg.png')}" alt="Baskin Icreams"/>
+                            </div>
+                            <div class="slds-media__body">
+                                <div class="slds-page-header__name">
+                                    <div class="slds-page-header__name-title">
+                                        <h1>
+                                            <span><b>Welcome to Baskins Ice cream</b></span>
+                                            <span class="slds-page-header__title slds-truncate" title="Recently Viewed">Records</span>
+                                        </h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-page-header__col-actions">
+                        <div class="slds-page-header__controls">
+                            <div class="slds-page-header__control">
+                                <ul class="slds-button-group-list">
+                                    <li>
+                                        <button class="slds-button slds-button_brand" onclick="showModal()">New order</button> 
+                                    </li>
+                                    <li>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-page-header__row">
+                    <div class="slds-page-header__col-meta">
+                        <p class="slds-page-header__meta-text"></p>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            <div style="height:640px; display:none " id="ModalPop">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="hideModalPop()" title="Close">
+                                <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>                                
+                                </svg>
+                                <span class="slds-assistive-text" >Close</span>
+                            </button>
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">New Order </h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label" for="text-input-id-1">
+                                    Name<abbr class="slds-required" title="required">* </abbr></label>
+                                <div class="slds-form-element__control">
+                                    <input type="text" id="text-input-id-1" placeholder="Enter Your Name" required="" aria-describedby="error-message-unique-id" class="slds-input" />
+                                </div>
+                                <div class="slds-form-element__help" id="error-message-unique-id"></div>
+                            </div> 
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label" for="select-01">Flavours<abbr class="slds-required" title="required">* </abbr></label>
+                                <div class="slds-form-element__control">
+                                    <div class="slds-select_container">
+                                        <select class="slds-select" id="select-01">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button class="slds-button slds-button_neutral" onclick="hideModalPop()">Cancel</button>
+                            <button class="slds-button slds-button_brand" id="saveBtn" onclick="saveRecord()">Save</button>
+                            <button class="slds-button slds-button_brand" id="updateBtn">Update</button>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </div>
+            
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Name
+                        </th>          
+                        <th>
+                            Flavour
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                    
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+            
+            
+            <div style="height:640px ; display:none" id="DeleteModalpop">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open ">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="deletepopClose()" title="Close">
+                                <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>                                
+                                </svg>
+                                <span class="slds-assistive-text">Close</span>
+                            </button>
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Delete Record</h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            <p>
+                                Are you sure Delete Record
+                            </p>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button class="slds-button slds-button_neutral" onclick="deletepopClose()">Cancel</button>
+                            <button class="slds-button slds-button_brand" id="dltbtn">Delete</button>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </div>
+            
+        </body>
+        
+    </html>
+</apex:page>
+
+
+apex class
+global with sharing class BaskinController {
+
+    
+     @RemoteAction
+    global static list<SelectOption> getFlavours(){
+        
+        List<SelectOption> options = new List<SelectOption>();
+        Schema.DescribeFieldResult Flavorget = Baskin__c.Flavour__c.getDescribe();
+        List<Schema.PicklistEntry> listFlavours = Flavorget.getPicklistValues();
+        
+        for(Schema.PicklistEntry flavour :listFlavours)
+        {
+           options.add(new SelectOption(flavour.getLabel(), flavour.getValue())); 
+        }
+        return options;
+    }
+    
+     @RemoteAction
+    global static void insertingNew(string name,string flavour){
+    Baskin__c robins=new Baskin__c();
+        robins.Name=name;
+        robins.Flavour__c=flavour;
+        insert robins;
+    }
+    
+    
+    @RemoteAction
+    global static list<Baskin__c> getDisplayList(){
+   List<Baskin__c> allRecords = new List<Baskin__c>();
+        allRecords=[select Name,Flavour__c,Id from Baskin__c ];
+        return allRecords;
+    }
+    
+     @RemoteAction
+    global static void getDeleteRecord(String Id){
+
+        if(String.isNotBlank(Id))
+        	delete [select Id from Baskin__c where Id= :Id];
+          }
+    
+       @RemoteAction
+    global static  boolean  getEditList(string name,string flavour, string id){
+	boolean result=false;
+        Baskin__c edit=[select Name,Flavour__c,Id from Baskin__c  where Id=:id];
+		edit.Name=name;
+        edit.Flavour__c=flavour;
+        try {
+            
+            update edit;
+        } 
+        catch(DmlException e) 
+        {
+            System.debug('The following exception has occurred: ' + e.getMessage());  
+            result=false;
+                }
+        
+        return result;
+    }
+}
