@@ -60,9 +60,10 @@ vfp
             
             $(document).ready(function(){
                 getFlavours();
-                displayRecords();
+                displayRecords(0);
                 
             });
+            
             function tostClose(){
                 $("#sucessalert").hide();
             }
@@ -142,7 +143,7 @@ vfp
                                 {
                                     console.log("updated");
                                     hideModalPop();
-                                    displayRecords();
+                                    displayRecords(0);
                                     
                                     
                                     
@@ -168,9 +169,9 @@ vfp
             function editModal(id)
             {
                 var name=$("#text-input-id-1").val(); 
-               var flavour= $("#select-01").val();
+                var flavour= $("#select-01").val();
                 var baskinId= id.split(',');
-                    
+                
                 
                 Visualforce.remoting.Manager.invokeAction(
                     '{!$RemoteAction.BaskinController.getEditList}',name,flavour,baskinId[2],
@@ -183,7 +184,7 @@ vfp
                     }, 
                     {escape: true}
                 ); $("#ModalPop").hide();
-                displayRecords();
+                displayRecords(0);
             }
             
             function showEditModal(name,flavour,id)
@@ -199,11 +200,11 @@ vfp
             }
             
             
-            function displayRecords()
+            function displayRecords(offset)
             {
-                
+                // var data = {limit: Limit,offset:Offset1};
                 Visualforce.remoting.Manager.invokeAction(
-                    '{!$RemoteAction.BaskinController.getDisplayList}',
+                    '{!$RemoteAction.BaskinController.getDisplayList}',offset,
                     function(result, event){
                         
                         if(event.status)
@@ -238,18 +239,100 @@ vfp
                                 +'</td></tr>';
                                 
                             }
-                        }$("#tableBody").html(appending);
+                        }$("#tableBody").append(appending);
+                        
+                      scrooll(offset+15);
                         
                     }, 
                     {escape: true}
                 );
                 
             }
+            function scrooll(n){
+                $("#scrool").scroll(function () { 
+                    if ($("#scrool").scrollTop() >= $(document).height() - $("#scrool").height() - 10) {
+                        displayRecords(n);
+                    }
+                });
+            }
+
+            
+            //scrool
+            /*var BaskinController =JSON.parse("{!(req)}");
+            function unescapedHtml()
+            {
+                return $("<span />", { html: arguments[0] }).text();
+            }
+            $(document).ready(function(){
+                displayRecords(0);
+                $('#tablediv').on('scroll', function() {
+                    
+                    
+                    var scroll = $(this).scrooltop();
+                    var ua = window.navigator.userAgent;
+                    var msie = ua.indexOf("MSIE ");
+                    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)){
+                        $('#tableId').css({
+                            transform:"translate3d(0,"+scroll+"px,0)"
+                        });
+                    }else{
+                        $('#tableId').css({
+                            transform:"translate3d(0,"+scroll+"px,0)"
+                        });
+                    }
+                    
+                    
+                    if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+                        //alert('loading');
+                        BaskinController.offset += BaskinController.limit;
+                        displayRecords();
+                    }
+                })
+                
+            });
+            
+            
+            
+            /*var newreq = new XMLHttpRequest();
+            newreq.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var myObj = JSON.parse(this.responseText);
+                    document.getElementById("demo").innerHTML = myObj.name;
+                }
+            };
+            xmlhttp.open("GET", "json_demo.txt", true);
+            xmlhttp.send();
+
+            
+             //scrool
+            
+            window.onscroll = function() {scrollFunction()};
+            
+            function scrollFunction() {
+                debugger;
+                $( "#scrool" ).scroll(function() {
+                    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    {"!scrooltop"}
+                } else {
+                    
+                }
+                });
+                
+                
+            }
+            
+            //document.addEventListener('scroll', function (event) {
+                   
+                //  {"!scrooltop"}
+                console.log('scrolling', event.result);
+                }
+            }, true Capture event*/
             
             </script>
             
         </head>
         <body>
+            
             
             
             <div class="slds-notify_container " style="height:4rem; display:none;"  id="sucessalert">
@@ -313,7 +396,10 @@ vfp
                         </div>
                     </div>
                 </div>
+                
+                
                 <div class="slds-page-header__row">
+                    
                     <div class="slds-page-header__col-meta">
                         <p class="slds-page-header__meta-text"></p>
                     </div>
@@ -321,105 +407,130 @@ vfp
             </div>
             
             
-            
-            <div style="height:640px; display:none " id="ModalPop">
-                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-                    <div class="slds-modal__container">
-                        <header class="slds-modal__header">
-                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="hideModalPop()" title="Close">
-                                <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>                                
-                                </svg>
-                                <span class="slds-assistive-text" >Close</span>
-                            </button>
-                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">New Order </h2>
-                        </header>
-                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                            <div class="slds-form-element">
-                                <label class="slds-form-element__label" for="text-input-id-1">
-                                    Name<abbr class="slds-required" title="required">* </abbr></label>
-                                <div class="slds-form-element__control">
-                                    <input type="text" id="text-input-id-1" placeholder="Enter Your Name" required="" aria-describedby="error-message-unique-id" class="slds-input" />
-                                </div>
-                                <div class="slds-form-element__help" id="error-message-unique-id"></div>
-                            </div> 
-                            <div class="slds-form-element">
-                                <label class="slds-form-element__label" for="select-01">Flavours<abbr class="slds-required" title="required">* </abbr></label>
-                                <div class="slds-form-element__control">
-                                    <div class="slds-select_container">
-                                        <select class="slds-select" id="select-01">
-                                        </select>
+           <div class="slds-scrollable_y" id="scrool">
+                <div style="height:640px; display:none " id="ModalPop">
+                    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                        <div class="slds-modal__container">
+                            <header class="slds-modal__header">
+                                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="hideModalPop()" title="Close">
+                                    <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>                                
+                                    </svg>
+                                    <span class="slds-assistive-text" >Close</span>
+                                </button>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">New Order </h2>
+                            </header>
+                            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                                <div class="slds-form-element">
+                                    <label class="slds-form-element__label" for="text-input-id-1">
+                                        Name<abbr class="slds-required" title="required">* </abbr></label>
+                                    <div class="slds-form-element__control">
+                                        <input type="text" id="text-input-id-1" placeholder="Enter Your Name" required="" aria-describedby="error-message-unique-id" class="slds-input" />
+                                    </div>
+                                    <div class="slds-form-element__help" id="error-message-unique-id"></div>
+                                </div> 
+                                <div class="slds-form-element">
+                                    <label class="slds-form-element__label" for="select-01">Flavours<abbr class="slds-required" title="required">* </abbr></label>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-select_container">
+                                            <select class="slds-select" id="select-01">
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <footer class="slds-modal__footer">
+                                <button class="slds-button slds-button_neutral" onclick="hideModalPop()">Cancel</button>
+                                <button class="slds-button slds-button_brand" id="saveBtn" onclick="saveRecord()">Save</button>
+                                <button class="slds-button slds-button_brand" id="updateBtn">Update</button>
+                            </footer>
                         </div>
-                        <footer class="slds-modal__footer">
-                            <button class="slds-button slds-button_neutral" onclick="hideModalPop()">Cancel</button>
-                            <button class="slds-button slds-button_brand" id="saveBtn" onclick="saveRecord()">Save</button>
-                            <button class="slds-button slds-button_brand" id="updateBtn">Update</button>
-                        </footer>
-                    </div>
-                </section>
-                <div class="slds-backdrop slds-backdrop_open"></div>
-            </div>
-            
-            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
-                <thead>
-                    <tr>
-                        <th>
-                            Name
-                        </th>          
-                        <th>
-                            Flavour
-                        </th>
-                        <th>
-                            Action
-                        </th>
-                    </tr>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </div>
+                
+                <div id="tablediv" style="height: 500px">
                     
-                </thead>
-                <tbody id="tableBody">
-                </tbody>
-            </table>
-            
-            
-            <div style="height:640px ; display:none" id="DeleteModalpop">
-                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open ">
-                    <div class="slds-modal__container">
-                        <header class="slds-modal__header">
-                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="deletepopClose()" title="Close">
-                                <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>                                
-                                </svg>
-                                <span class="slds-assistive-text">Close</span>
-                            </button>
-                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Delete Record</h2>
-                        </header>
-                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                            <p>
-                                Are you sure Delete Record
-                            </p>
+                
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" id="tableId">
+                    <thead>
+                        <tr>
+                            <th>
+                                Name
+                            </th>          
+                            <th>
+                                Flavour
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                        
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+                </div>
+                
+                <div style="height:640px ; display:none" id="DeleteModalpop">
+                    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open ">
+                        <div class="slds-modal__container">
+                            <header class="slds-modal__header">
+                                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick="deletepopClose()" title="Close">
+                                    <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>                                
+                                    </svg>
+                                    <span class="slds-assistive-text">Close</span>
+                                </button>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Delete Record</h2>
+                            </header>
+                            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                                <p>
+                                    Are you sure Delete Record
+                                </p>
+                            </div>
+                            <footer class="slds-modal__footer">
+                                <button class="slds-button slds-button_neutral" onclick="deletepopClose()">Cancel</button>
+                                <button class="slds-button slds-button_brand" id="dltbtn">Delete</button>
+                            </footer>
                         </div>
-                        <footer class="slds-modal__footer">
-                            <button class="slds-button slds-button_neutral" onclick="deletepopClose()">Cancel</button>
-                            <button class="slds-button slds-button_brand" id="dltbtn">Delete</button>
-                        </footer>
-                    </div>
-                </section>
-                <div class="slds-backdrop slds-backdrop_open"></div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </div>
             </div>
-            
         </body>
         
     </html>
 </apex:page>
 
 
+
+
+
 apex class
 global with sharing class BaskinController {
-
+    public integer offSet{get;set;}
+    public integer limitSize{get;set;}
+    public integer totalrecords{get;set;}
+    public string req {get;set;}
+    public BaskinController()
+    {
+        
+        totalrecords=[select count() from Baskin__c ]; 
+        this.limitSize=5;
+        this.offSet=0;
+    }
     
-     @RemoteAction
+    @RemoteAction
+    global static list<Baskin__c> getDisplayList(Integer offsetVal){
+        // BaskinController req=(BaskinController)JSON.deserializeStrict(BaskinController, BaskinController.class);
+        List<Baskin__c> allRecords = new List<Baskin__c>();
+        allRecords=[select Name,Flavour__c,Id from Baskin__c limit 15 OFFSET : offsetVal ];
+        return allRecords;
+    }
+    
+    
+    @RemoteAction
     global static list<SelectOption> getFlavours(){
         
         List<SelectOption> options = new List<SelectOption>();
@@ -428,39 +539,35 @@ global with sharing class BaskinController {
         
         for(Schema.PicklistEntry flavour :listFlavours)
         {
-           options.add(new SelectOption(flavour.getLabel(), flavour.getValue())); 
+            options.add(new SelectOption(flavour.getLabel(), flavour.getValue())); 
         }
         return options;
     }
     
-     @RemoteAction
+    @RemoteAction
     global static void insertingNew(string name,string flavour){
-    Baskin__c robins=new Baskin__c();
+        Baskin__c robins=new Baskin__c();
         robins.Name=name;
         robins.Flavour__c=flavour;
         insert robins;
     }
     
     
+    
+    
+    
     @RemoteAction
-    global static list<Baskin__c> getDisplayList(){
-   List<Baskin__c> allRecords = new List<Baskin__c>();
-        allRecords=[select Name,Flavour__c,Id from Baskin__c ];
-        return allRecords;
+    global static void getDeleteRecord(String Id){
+        
+        if(String.isNotBlank(Id))
+            delete [select Id from Baskin__c where Id= :Id];
     }
     
-     @RemoteAction
-    global static void getDeleteRecord(String Id){
-
-        if(String.isNotBlank(Id))
-        	delete [select Id from Baskin__c where Id= :Id];
-          }
-    
-       @RemoteAction
+    @RemoteAction
     global static  boolean  getEditList(string name,string flavour, string id){
-	boolean result=false;
+        boolean result=false;
         Baskin__c edit=[select Name,Flavour__c,Id from Baskin__c  where Id=:id];
-		edit.Name=name;
+        edit.Name=name;
         edit.Flavour__c=flavour;
         try {
             
@@ -470,8 +577,25 @@ global with sharing class BaskinController {
         {
             System.debug('The following exception has occurred: ' + e.getMessage());  
             result=false;
-                }
+        }
         
         return result;
     }
+    
+   /* public void scrooltop(){
+        offset=0;
+        limitsize=5;
+    }
+    public void scrooldown(){
+        offset+=limitsize;
+    }
+    public void scroolup(){
+        offset-=limitsize;
+    }
+    
+    public  void scroollast(){
+        offset=totalrecords-math.mod(totalrecords,limitsize);
+    }*/
+    
+    
 }
