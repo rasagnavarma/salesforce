@@ -1,5 +1,18 @@
 vfp
 
+<!--
+  @Page Name          : baskinscrool.page
+  @Description        : 
+  @Author             : Rasagna Varma 
+  @Group              : 
+  @Last Modified By   : Rasagna Varma 
+  @Last Modified On   : 29/8/2019, 2:54:07 PM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      		      Modification
+  ==============================================================================
+  1.0    22/8/2019, 4:25:12 PM   Rasagna Varma      Initial Version
+-->
 <apex:page controller="BaskinController">
     
     <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -9,40 +22,35 @@ vfp
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
             </script>
             <script>
+            var offSetVal =0;
+            var scrollHeight =0;
+            var isScrollRun = false;
             function showModal()
             {
-                
                 $("#ModalPop").show();
                 $("#saveBtn").show();
                 $("#updateBtn").hide();
-                
                 clearData();
-                
             }
-            
-            
-            
-            function clearData()
+              function clearData()
             {
                 $("#text-input-id-1").val(''); 
                 $("#select-01").val("None"); 
+                $("#text-input-id-2").val('');
             }
             function hideModalPop()
             {
                 $("#ModalPop").hide();
             }
-            
             </script>
             <script>
             function getFlavours()
             {
-                
                 Visualforce.remoting.Manager.invokeAction(
                     '{!$RemoteAction.BaskinController.getFlavours}',
                     function(result, event){
                         if(event.status)
                         {
-                            
                             var sel='<option value="None">None</option>';
                             for(i=0;i<result.length;i++)
                             {
@@ -50,20 +58,14 @@ vfp
                             }
                             $('#select-01').html(sel);
                         }
-                        
                     }, 
                     {escape: true}
                 );
             }
-            
-            
-            
-            $(document).ready(function(){
+             $(document).ready(function(){
                 getFlavours();
-                displayRecords(0);
-                
+                displayRecords();
             });
-            
             function tostClose(){
                 $("#sucessalert").hide();
             }
@@ -73,7 +75,6 @@ vfp
             }
             function deleteRecords(Id)
             {
-                
                 $("#DeleteModalpop").hide();
                 Visualforce.remoting.Manager.invokeAction(
                     '{!$RemoteAction.BaskinController.getDeleteRecord}',Id,
@@ -87,29 +88,26 @@ vfp
                             $('#sucessalert').show();
                             $('#toastId').addClass('slds-theme_success');
                             $('#tostMsgId').html('succesfully deleted');
+                            $("#spinner").show();
                             setTimeout(function(){
                                 $('#sucessalert').hide();
-                            }, 5000);
-                            
-                            
+                                $("#spinner").hide();
+                            }, 5000);                        
                         }
                     },
                     {escape: true}
-                    
                 );
             }
             function shoedelModal(id){
                 $("#DeleteModalpop").show();
                 $('#dltbtn').attr('onClick','deleteRecords("'+id+'")');
-                
             }
-            
-            
             function saveRecord()
             {
                 var name=$("#text-input-id-1").val();  
                 name=$.trim(name);
                 var falv= $("#select-01").val();
+                var email=$("#text-input-id-2").val();
                 if(name=='' )
                     
                 {
@@ -119,75 +117,90 @@ vfp
                     setTimeout(function(){
                         $('#sucessalert').hide();
                     }, 5000);
-                    
                 }
                 else if(falv=='None')
                 {
                     $('#sucessalert').show();
                     $('#toastId').addClass('slds-theme_error');
                     $('#tostMsgId').html('please enter the flavour');
+                    
                     setTimeout(function(){
                         $('#sucessalert').hide();
+                        
                     }, 5000);
+                 }
+                 
+                 else if(email == '' || email.indexOf('@') == -1 || email.indexOf('.') == -1)
+                {
+                    $('#sucessalert').show();
+                    $('#toastId').addClass('slds-theme_error');
+                    $('#tostMsgId').html('please enter valid email');
                     
-                }
-                
+                    setTimeout(function(){
+                        $('#sucessalert').hide();
+                        
+                    }, 5000);
+                 }
+                 
+
                     else 
                     {
-                        
                         Visualforce.remoting.Manager.invokeAction(
-                            '{!$RemoteAction.BaskinController.insertingNew}',name,falv,
+                            '{!$RemoteAction.BaskinController.insertingNew}',name,falv,email,
                             function(result, event)
                             {
                                 if(event.status)
                                 {
-                                    console.log("updated");
                                     hideModalPop();
-                                    displayRecords(0);
-                                    
-                                    
-                                    
-                                    
+                                    displayRecords();
+                                    $("#ModalPop").hide();
                                 }
-                                
                                 $('#sucessalert').show();
                                 $('#toastId').removeClass('slds-theme_error');
                                 $('#toastId').addClass('slds-theme_success');
                                 $('#tostMsgId').html('succesfully added records');
+                                $("#spinner").show();
                                 setTimeout(function(){
                                     $('#sucessalert').hide();
-                                }, 5000);
+                                    $("#spinner").hide();
+                                }, 2000);
                             },
                             {escape: true}
-                            
                         );
                     }
-                
-            }
-            
-            
+                 }
             function editModal(id)
             {
-                var name=$("#text-input-id-1").val(); 
+                var name= $("#text-input-id-1").val(); 
                 var flavour= $("#select-01").val();
+                var email= $("#text-input-id-2").val(); 
                 var baskinId= id.split(',');
-                
-                
                 Visualforce.remoting.Manager.invokeAction(
-                    '{!$RemoteAction.BaskinController.getEditList}',name,flavour,baskinId[2],
+                    '{!$RemoteAction.BaskinController.getEditList}',name,flavour,email,baskinId[3],
                     function(result, event){
                         if(event.status)
                         {
                             
                         }
-                        
+
                     }, 
                     {escape: true}
                 ); $("#ModalPop").hide();
-                displayRecords(0);
+                //$("#spinner").show();
+                displayRecords();
             }
-            
-            function showEditModal(name,flavour,id)
+            function checkEmail() {
+
+                 var email = document.getElementById('txtEmail');
+                var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+                if (!filter.test(email.value)) {
+                    alert('Please provide a valid email address');
+                    email.focus;
+                    return false;
+                    }
+            }
+            function showEditModal(name,flavour,email,id)
             {
                 $("#ModalPop").show();
                 clearData();
@@ -195,146 +208,76 @@ vfp
                 $("#saveBtn").hide();
                 $("#text-input-id-1").val(name); 
                 $("#select-01").val(flavour);
-                $('#updateBtn').attr('onClick','editModal("'+name+','+flavour+','+id+'")');
+                $("#text-input-id-2").val(email); 
+                $('#updateBtn').attr('onClick','editModal("'+name+','+flavour+','+email+','+id+'")');
                 
             }
-            
-            
-            function displayRecords(offset)
+            function displayRecords()
             {
+                
                 // var data = {limit: Limit,offset:Offset1};
                 Visualforce.remoting.Manager.invokeAction(
-                    '{!$RemoteAction.BaskinController.getDisplayList}',offset,
+                    '{!$RemoteAction.BaskinController.getDisplayList}',offSetVal,
                     function(result, event){
                         
                         if(event.status)
                         {
-                            var appending='';
-                            for(i=0;i<result.length;i++)
-                            {
-                                appending+= '<tr><td id="'+result[i].Id+'">'+result[i].Name+'</td><td>'+result[i].Flavour__c+'</td><td>' 
-                                +' <div class="slds-dropdown-trigger " aria-expanded="true">'
-                                +'   <button class="slds-button slds-button--icon-border-filled" aria-haspopup="true">'
-                                +'    <svg aria-hidden="true" class="slds-button__icon slds-button__icon--hint">'
-                                +'     <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}">'
-                                +'</use>'
-                                +'    </svg>'
-                                +'  <span class="slds-assistive-text">Show More</span>'
-                                +'</button>'
-                                +'<div class="slds-dropdown slds-dropdown--left">'
-                                +'  <ul class="dropdown__list" role="menu">'
-                                +'    <li class="slds-dropdown__item">'
-                                +'      <a href="#void" role="menuitem">'
-                                +'        <p class="slds-truncate" id="editbtn" onclick=showEditModal("'+result[i].Name+'","'+result[i].Flavour__c+'","'+result[i].Id+'")>Edit</p>'
-                                +'      </a>'
-                                +'    </li>'
-                                +'  <li class="slds-dropdown__item">'
-                                +'    <a href="#void" role="menuitem">'
-                                +'      <p class="slds-truncate" id="deletebtn" onclick="shoedelModal(\''+result[i].Id+'\')">Delete</p>'
-                                +'    </a>'
-                                +'  </li>'
-                                +'</ul>'
-                                +'</div>'
-                                +'</div>'
-                                +'</td></tr>';
-                                
+                            if(result.length > 0){
+                                var appending='';
+                                for(i=0;i<result.length;i++)
+                                {
+                                    appending+= '<tr><td id="'+result[i].Id+'">'+result[i].Name+'</td><td>'+result[i].Flavour__c+'</td><td>'+result[i].Email__c+'</td><td>' 
+                                    +' <div class="slds-dropdown-trigger " aria-expanded="true">'
+                                    +'   <button class="slds-button slds-button--icon-border-filled" aria-haspopup="true">'
+                                    +'    <svg aria-hidden="true" class="slds-button__icon slds-button__icon--hint">'
+                                    +'     <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}">'
+                                    +'</use>'
+                                    +'    </svg>'
+                                    +'  <span class="slds-assistive-text">Show More</span>'
+                                    +'</button>'
+                                    +'<div class="slds-dropdown slds-dropdown--left">'
+                                    +'  <ul class="dropdown__list" role="menu">'
+                                    +'    <li class="slds-dropdown__item">'
+                                    +'      <a href="#void" role="menuitem">'
+                                    +'        <p class="slds-truncate" id="editbtn" onclick=showEditModal("'+result[i].Name+'","'+result[i].Flavour__c+'","'+result[i].Email__c+'","'+result[i].Id+'")>Edit</p>'
+                                    +'      </a>'
+                                    +'    </li>'
+                                    +'  <li class="slds-dropdown__item">'
+                                    +'    <a href="#void" role="menuitem">'
+                                    +'      <p class="slds-truncate" id="deletebtn" onclick="shoedelModal(\''+result[i].Id+'\')">Delete</p>'
+                                    +'    </a>'
+                                    +'  </li>'
+                                    +'</ul>'
+                                    +'</div>'
+                                    +'</div>'
+                                    +'</td></tr>';
+                                }
+                                $("#tableBody").append(appending);
+                                scrollHeight =scrollHeight + 150;                            
+                                ScrollFunction();
+                            }else{
+                                isScrollRun = false;
+                                scrollHeight = 0;
+                                offSetVal = 0;
                             }
-                        }$("#tableBody").append(appending);
-                        
-                      scrooll(offset+15);
-                        
+                        }
                     }, 
                     {escape: true}
                 );
-                
             }
-            function scrooll(n){
-                $("#scrool").scroll(function () { 
-                    if ($("#scrool").scrollTop() >= $(document).height() - $("#scrool").height() - 10) {
-                        displayRecords(n);
-                    }
-                });
-            }
-
-            
-            //scrool
-            /*var BaskinController =JSON.parse("{!(req)}");
-            function unescapedHtml()
-            {
-                return $("<span />", { html: arguments[0] }).text();
-            }
-            $(document).ready(function(){
-                displayRecords(0);
-                $('#tablediv').on('scroll', function() {
-                    
-                    
-                    var scroll = $(this).scrooltop();
-                    var ua = window.navigator.userAgent;
-                    var msie = ua.indexOf("MSIE ");
-                    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)){
-                        $('#tableId').css({
-                            transform:"translate3d(0,"+scroll+"px,0)"
-                        });
-                    }else{
-                        $('#tableId').css({
-                            transform:"translate3d(0,"+scroll+"px,0)"
-                        });
-                    }
-                    
-                    
-                    if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
-                        //alert('loading');
-                        BaskinController.offset += BaskinController.limit;
-                        displayRecords();
-                    }
-                })
-                
-            });
-            
-            
-            
-            /*var newreq = new XMLHttpRequest();
-            newreq.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var myObj = JSON.parse(this.responseText);
-                    document.getElementById("demo").innerHTML = myObj.name;
-                }
-            };
-            xmlhttp.open("GET", "json_demo.txt", true);
-            xmlhttp.send();
-
-            
-             //scrool
-            
-            window.onscroll = function() {scrollFunction()};
-            
-            function scrollFunction() {
-                debugger;
-                $( "#scrool" ).scroll(function() {
-                    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                    {"!scrooltop"}
-                } else {
-                    
-                }
-                });
-                
-                
-            }
-            
-            //document.addEventListener('scroll', function (event) {
-                   
-                //  {"!scrooltop"}
-                console.log('scrolling', event.result);
-                }
-            }, true Capture event*/
-            
+            //     function ScrollFunction(){
+            //     $("#baskinDiv").scroll(function () {
+            //         if($(this).scrollTop() != 0 && $(this).scrollTop() > scrollHeight && $(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight- 50 && isScrollRun){   
+            //             offSetVal = offSetVal+15;
+                        
+            //             displayRecords();                      
+            //         }
+            //         isScrollRun = true;
+            //     });
+            //  }
             </script>
-            
         </head>
         <body>
-            
-            
-            
             <div class="slds-notify_container " style="height:4rem; display:none;"  id="sucessalert">
                 <div class="slds-notify slds-notify_toast" id="toastId" role="status">
                     <span class="slds-assistive-text">success</span>
@@ -357,17 +300,11 @@ vfp
                     </div>
                 </div>
             </div>
-            
-            
-            
-            
-            
             <div class="slds-page-header">
                 <div class="slds-page-header__row">
                     <div class="slds-page-header__col-title">
                         <div class="slds-media">
-                            <div class="slds-media__figure">
-                                
+                            <div class="slds-media__figure"> 
                                 <apex:image id="theImage" width="50" height="50" value="{!IMAGEPROXYURL('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Baskin-Robbins_logo.svg/1024px-Baskin-Robbins_logo.svg.png')}" alt="Baskin Icreams"/>
                             </div>
                             <div class="slds-media__body">
@@ -396,18 +333,13 @@ vfp
                         </div>
                     </div>
                 </div>
-                
-                
                 <div class="slds-page-header__row">
-                    
                     <div class="slds-page-header__col-meta">
                         <p class="slds-page-header__meta-text"></p>
                     </div>
                 </div>
             </div>
-            
-            
-           <div class="slds-scrollable_y" id="scrool">
+           <div class="slds-scrollable_y"  id="baskinDiv">
                 <div style="height:640px; display:none " id="ModalPop">
                     <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                         <div class="slds-modal__container">
@@ -438,6 +370,12 @@ vfp
                                         </div>
                                     </div>
                                 </div>
+                                <div class="slds-form-element">
+                                    <label class="slds-form-element__label" for="text-input-id-2">Email</label>
+                                    <div class="slds-form-element__control">
+                                      <input type="text" id="text-input-id-2" placeholder="Email" class="slds-input" />
+                                    </div>
+                                  </div>
                             </div>
                             <footer class="slds-modal__footer">
                                 <button class="slds-button slds-button_neutral" onclick="hideModalPop()">Cancel</button>
@@ -448,10 +386,7 @@ vfp
                     </section>
                     <div class="slds-backdrop slds-backdrop_open"></div>
                 </div>
-                
                 <div id="tablediv" style="height: 500px">
-                    
-                
                 <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" id="tableId">
                     <thead>
                         <tr>
@@ -462,16 +397,17 @@ vfp
                                 Flavour
                             </th>
                             <th>
+                                Email
+                            </th>
+                            <th>
                                 Action
                             </th>
                         </tr>
-                        
                     </thead>
                     <tbody id="tableBody">
                     </tbody>
                 </table>
-                </div>
-                
+                </div>  
                 <div style="height:640px ; display:none" id="DeleteModalpop">
                     <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open ">
                         <div class="slds-modal__container">
@@ -498,16 +434,34 @@ vfp
                     <div class="slds-backdrop slds-backdrop_open"></div>
                 </div>
             </div>
+            <div class="demo-only demo--inverse" style="height:6rem; display:none" id="spinner">
+                <div role="status" class="slds-spinner slds-spinner_medium">
+                <span class="slds-assistive-text"></span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+                </div>
+                </div>
         </body>
-        
     </html>
 </apex:page>
 
 
 
 
-
 apex class
+/**
+ * @File Name          : BaskinController.cls
+ * @Description        : 
+ * @Author             : Rasagna Varma 
+ * @Group              : 
+ * @Last Modified By   : Rasagna Varma 
+ * @Last Modified On   : 29/8/2019, 2:11:12 PM
+ * @Modification Log   : 
+ *==============================================================================
+ * Ver         Date                     Author      		      Modification
+ *==============================================================================
+ * 1.0    22/8/2019, 3:05:11 PM   Rasagna Varma      Initial Version
+**/
 global with sharing class BaskinController {
     public integer offSet{get;set;}
     public integer limitSize{get;set;}
@@ -525,10 +479,10 @@ global with sharing class BaskinController {
     global static list<Baskin__c> getDisplayList(Integer offsetVal){
         // BaskinController req=(BaskinController)JSON.deserializeStrict(BaskinController, BaskinController.class);
         List<Baskin__c> allRecords = new List<Baskin__c>();
-        allRecords=[select Name,Flavour__c,Id from Baskin__c limit 15 OFFSET : offsetVal ];
+        allRecords=[select Name,Flavour__c,Email__c,Id from Baskin__c order by Id asc  ];
         return allRecords;
     }
-    
+    // limit 15 OFFSET : offsetVal
     
     @RemoteAction
     global static list<SelectOption> getFlavours(){
@@ -545,10 +499,11 @@ global with sharing class BaskinController {
     }
     
     @RemoteAction
-    global static void insertingNew(string name,string flavour){
+    global static void insertingNew(string name,string flavour, String email){
         Baskin__c robins=new Baskin__c();
         robins.Name=name;
         robins.Flavour__c=flavour;
+        robins.Email__c=email;
         insert robins;
     }
     
@@ -564,14 +519,16 @@ global with sharing class BaskinController {
     }
     
     @RemoteAction
-    global static  boolean  getEditList(string name,string flavour, string id){
+    global static  boolean  getEditList(string name,string flavour, String email,string id){
         boolean result=false;
-        Baskin__c edit=[select Name,Flavour__c,Id from Baskin__c  where Id=:id];
+        Baskin__c edit=[select Name,Flavour__c,Email__c,Id from Baskin__c  where Id=:id];
         edit.Name=name;
         edit.Flavour__c=flavour;
+        edit.Email__c=email;
         try {
             
             update edit;
+            result=true;
         } 
         catch(DmlException e) 
         {
@@ -598,4 +555,59 @@ global with sharing class BaskinController {
     }*/
     
     
+}
+
+
+
+trigger
+/**
+ * @File Name          : BaskinTrigger.trigger
+ * @Description        : 
+ * @Author             : Rasagna Varma 
+ * @Group              : 
+ * @Last Modified By   : Rasagna Varma 
+ * @Last Modified On   : 29/8/2019, 2:53:23 PM
+ * @Modification Log   : 
+ *==============================================================================
+ * Ver         Date                     Author      		      Modification
+ *==============================================================================
+ * 1.0    29/8/2019, 2:07:18 PM   Rasagna Varma      Initial Version
+**/
+trigger BaskinTrigger on Baskin__c (before insert, before update) 
+{
+     Map<String, Baskin__c> BaskinMap = new Map<String, Contact>();
+    for (Baskin__c Contact : System.Trigger.new) {
+		
+        // Make sure we don't treat an email address that  
+        // isn't changing during an update as a duplicate.  
+    
+        if ((Baskin__c.Email__c != null) &&
+                (System.Trigger.isInsert ||
+                (Baskin__c.Email__c != 
+                    System.Trigger.oldMap.get(Baskin__c.Id).Email__c))) {
+		
+            // Make sure another new Contact isn't also a duplicate  
+    
+            if (BaskinMap.containsKey(Baskin__c.Email__c)) {
+                Baskin__c.Email__c.addError('Another new Contact has the '
+                                    + 'same email address.');
+            } else {
+                BaskinMap.put(Baskin__c.Email__c, Baskin__c);
+            }
+       }
+    }
+	
+    // Using a single database query, find all the Contacts in  
+    
+    // the database that have the same email address as any  
+    
+    // of the Contacts being inserted or updated.  
+    
+    for (Baskin__c Baskin : [SELECT Email__C FROM Baskin__c
+                      WHERE Email__c IN :BaskinMap.KeySet()]) {
+        Baskin__c newBaskin = BaskinMap.get(Baskin__c.Email__c);
+        newBaskin.Email__c.addError('A Contact with this email '
+                               + 'address already exists.');
+    }
+  }
 }
