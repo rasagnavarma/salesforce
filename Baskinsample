@@ -1,12 +1,10 @@
-vfp
-
 <!--
   @Page Name          : baskinscrool.page
   @Description        : 
   @Author             : Rasagna Varma 
   @Group              : 
   @Last Modified By   : Rasagna Varma 
-  @Last Modified On   : 29/8/2019, 2:54:07 PM
+  @Last Modified On   : 6/9/2019, 8:56:32 PM
   @Modification Log   : 
   ==============================================================================
   Ver         Date                     Author      		      Modification
@@ -14,7 +12,6 @@ vfp
   1.0    22/8/2019, 4:25:12 PM   Rasagna Varma      Initial Version
 -->
 <apex:page controller="BaskinController">
-    
     <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <head>
             <apex:includeScript value="/soap/ajax/36.0/connection.js"/>
@@ -110,150 +107,171 @@ vfp
                 var email=$("#text-input-id-2").val();
                 if(name=='' )
                     
-                {
-                    $('#sucessalert').show();
-                    $('#toastId').addClass('slds-theme_error');
-                    $('#tostMsgId').html('please enter the name');
-                    setTimeout(function(){
-                        $('#sucessalert').hide();
-                    }, 5000);
+            {
+                $('#sucessalert').show();
+                $('#toastId').addClass('slds-theme_error');
+                $('#tostMsgId').html('please enter the name');
+                setTimeout(function(){
+                    $('#sucessalert').hide();
+                }, 5000);
+            }
+            else if(falv=='None')
+            {
+                $('#sucessalert').show();
+                $('#toastId').addClass('slds-theme_error');
+                $('#tostMsgId').html('please enter the flavour');
+                
+                setTimeout(function(){
+                    $('#sucessalert').hide();
+                    
+                }, 5000);
                 }
-                else if(falv=='None')
-                {
-                    $('#sucessalert').show();
-                    $('#toastId').addClass('slds-theme_error');
-                    $('#tostMsgId').html('please enter the flavour');
+                
+                else if(email == '' || email.indexOf('@') == -1 || email.indexOf('.') == -1)
+            {
+                $('#sucessalert').show();
+                $('#toastId').addClass('slds-theme_error');
+                $('#tostMsgId').html('please enter valid email');
+                
+                setTimeout(function(){
+                    $('#sucessalert').hide();
                     
-                    setTimeout(function(){
-                        $('#sucessalert').hide();
-                        
-                    }, 5000);
-                 }
-                 
-                 else if(email == '' || email.indexOf('@') == -1 || email.indexOf('.') == -1)
+                }, 5000);
+            }
+                else 
                 {
-                    $('#sucessalert').show();
-                    $('#toastId').addClass('slds-theme_error');
-                    $('#tostMsgId').html('please enter valid email');
-                    
-                    setTimeout(function(){
-                        $('#sucessalert').hide();
-                        
-                    }, 5000);
-                 }
-                 
-
-                    else 
-                    {
-                        Visualforce.remoting.Manager.invokeAction(
-                            '{!$RemoteAction.BaskinController.insertingNew}',name,falv,email,
-                            function(result, event)
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.BaskinController.insertingNew}',name,falv,email,
+                        function(result, event)
+                        {
+                            if(event.status)
                             {
-                                if(event.status)
-                                {
-                                    hideModalPop();
-                                    displayRecords();
-                                    $("#ModalPop").hide();
-                                }
-                                $('#sucessalert').show();
-                                $('#toastId').removeClass('slds-theme_error');
-                                $('#toastId').addClass('slds-theme_success');
-                                $('#tostMsgId').html('succesfully added records');
-                                $("#spinner").show();
-                                setTimeout(function(){
-                                    $('#sucessalert').hide();
-                                    $("#spinner").hide();
-                                }, 2000);
-                            },
-                            {escape: true}
-                        );
+                                hideModalPop();
+                                displayRecords();
+                                $("#ModalPop").hide();
+                            }
+                            $('#sucessalert').show();
+                            $('#toastId').removeClass('slds-theme_error');
+                            $('#toastId').addClass('slds-theme_success');
+                            $('#tostMsgId').html('succesfully added records');
+                            $("#spinner").show();
+                            setTimeout(function(){
+                                $('#sucessalert').hide();
+                                $("#spinner").hide();
+                            }, 2000);
+                        },
+                        {escape: true}
+                    );
+                }
+			}
+        function editModal(id)
+        {
+            var name= $("#text-input-id-1").val(); 
+            var flavour= $("#select-01").val();
+            var email= $("#text-input-id-2").val(); 
+            var baskinId= id.split(',');
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.BaskinController.getEditList}',name,flavour,email,baskinId[3],
+                function(result, event){
+                    if(event.status)
+                    {
+                        $("#tableBody").html('');
+                        displayRecords();
                     }
-                 }
-            function editModal(id)
-            {
-                var name= $("#text-input-id-1").val(); 
-                var flavour= $("#select-01").val();
-                var email= $("#text-input-id-2").val(); 
-                var baskinId= id.split(',');
-                Visualforce.remoting.Manager.invokeAction(
-                    '{!$RemoteAction.BaskinController.getEditList}',name,flavour,email,baskinId[3],
-                    function(result, event){
-                        if(event.status)
-                        {
-                            
-                        }
 
-                    }, 
-                    {escape: true}
-                ); $("#ModalPop").hide();
-                //$("#spinner").show();
-                displayRecords();
-            }
-            function checkEmail() {
+                }, 
+                {escape: true}
+            ); 
+            $("#ModalPop").hide();   
+        }
+        function checkEmail() {
 
-                 var email = document.getElementById('txtEmail');
-                var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+                var email = document.getElementById('txtEmail');
+            var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 
-                if (!filter.test(email.value)) {
-                    alert('Please provide a valid email address');
-                    email.focus;
-                    return false;
-                    }
-            }
-            function showEditModal(name,flavour,email,id)
-            {
-                $("#ModalPop").show();
-                clearData();
-                $("#updateBtn").show();
-                $("#saveBtn").hide();
-                $("#text-input-id-1").val(name); 
-                $("#select-01").val(flavour);
-                $("#text-input-id-2").val(email); 
-                $('#updateBtn').attr('onClick','editModal("'+name+','+flavour+','+email+','+id+'")');
-                
-            }
-            function displayRecords()
-            {
-                
-                // var data = {limit: Limit,offset:Offset1};
-                Visualforce.remoting.Manager.invokeAction(
-                    '{!$RemoteAction.BaskinController.getDisplayList}',offSetVal,
-                    function(result, event){
-                        
-                        if(event.status)
-                        {
-                            if(result.length > 0){
-                                var appending='';
-                                for(i=0;i<result.length;i++)
-                                {
-                                    appending+= '<tr><td id="'+result[i].Id+'">'+result[i].Name+'</td><td>'+result[i].Flavour__c+'</td><td>'+result[i].Email__c+'</td><td>' 
-                                    +' <div class="slds-dropdown-trigger " aria-expanded="true">'
-                                    +'   <button class="slds-button slds-button--icon-border-filled" aria-haspopup="true">'
-                                    +'    <svg aria-hidden="true" class="slds-button__icon slds-button__icon--hint">'
-                                    +'     <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}">'
-                                    +'</use>'
-                                    +'    </svg>'
-                                    +'  <span class="slds-assistive-text">Show More</span>'
-                                    +'</button>'
-                                    +'<div class="slds-dropdown slds-dropdown--left">'
-                                    +'  <ul class="dropdown__list" role="menu">'
-                                    +'    <li class="slds-dropdown__item">'
-                                    +'      <a href="#void" role="menuitem">'
-                                    +'        <p class="slds-truncate" id="editbtn" onclick=showEditModal("'+result[i].Name+'","'+result[i].Flavour__c+'","'+result[i].Email__c+'","'+result[i].Id+'")>Edit</p>'
-                                    +'      </a>'
-                                    +'    </li>'
-                                    +'  <li class="slds-dropdown__item">'
-                                    +'    <a href="#void" role="menuitem">'
-                                    +'      <p class="slds-truncate" id="deletebtn" onclick="shoedelModal(\''+result[i].Id+'\')">Delete</p>'
-                                    +'    </a>'
-                                    +'  </li>'
-                                    +'</ul>'
-                                    +'</div>'
-                                    +'</div>'
-                                    +'</td></tr>';
+            if (!filter.test(email.value)) {
+                alert('Please provide a valid email address');
+                email.focus;
+                return false;
+                }
+        }
+        function showEditModal(name,flavour,email,id)
+        {
+            $("#ModalPop").show();
+            clearData();
+            $("#updateBtn").show();
+            $("#saveBtn").hide();
+            $("#text-input-id-1").val(name); 
+            $("#select-01").val(flavour);
+            $("#text-input-id-2").val(email); 
+            $('#updateBtn').attr('onClick','editModal("'+name+','+flavour+','+email+','+id+'")');
+            
+        }
+        function displayRecords()
+        {
+            // var data = {limit: Limit,offset:Offset1};
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.BaskinController.getDisplayList}',offSetVal,
+                function(result, event){
+                    if(event.status)
+                    {
+                        if(result.length > 0){
+                            var appending='';
+                            for(i=0;i<result.length;i++)
+                            {
+                                appending+= '<tr><td id="'+result[i].Id+'">'+result[i].Name+'</td><td>'+result[i].Flavour__c+'</td><td>'+result[i].Email__c+'</td><td>';
+                                // +'<div class="slds-form-element">'
+                                // +'<div class="slds-form-element__control">'
+                                // +'<div class="slds-checkbox">'
+                                // +'<input type="checkbox" name="options" id="checkbox-45" value="checkbox-45" />'
+                                // +'<label class="slds-checkbox__label" for="checkbox-45">'
+                                // +'<span class="slds-checkbox_faux"></span>'
+                                // +'<span class="slds-form-element__label">Email Sent</span>'
+                                // +'</label>'
+                                // +'</div>'
+                                // +'</div>'
+                                // +'</div>'
+                                if(result[i].schedule__c){
+                                    appending+='<input type="checkbox" name="Checkboxx" value="Email" checked="checked"> Schedule<br></td><td>' ;
                                 }
-                                $("#tableBody").append(appending);
-                                scrollHeight =scrollHeight + 150;                            
+                                else{
+                                    appending+='<input type="checkbox" name="Checkboxx" value="Email"> Schedule<br></td><td>'; 
+                                }
+                       
+                                if(result[i].Mail_sent__c){
+                                    appending+='<input type="checkbox" name="Checkboxx" value="Email" checked="checked"> Email sent<br></td><td>' ;
+                                }
+                                else{
+                                    appending+='<input type="checkbox" name="Checkboxx" value="Email"> Email sent<br></td><td>'; 
+                                }
+                                    appending+=' <div class="slds-dropdown-trigger " aria-expanded="true">';
+                                    appending+='  <button class="slds-button slds-button--icon-border-filled" aria-haspopup="true">';
+                                        appending+='    <svg aria-hidden="true" class="slds-button__icon slds-button__icon--hint">';
+                                            appending+='     <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}">';
+                                                appending+='</use>';
+                                                appending+='    </svg>';
+                                                appending+='  <span class="slds-assistive-text">Show More</span>';
+                                                appending+='</button>';
+                                                appending+='<div class="slds-dropdown slds-dropdown--left">';
+                                                    appending+='  <ul class="dropdown__list" role="menu">';
+                                                        appending+='    <li class="slds-dropdown__item">';
+                                                            appending+='      <a href="#void" role="menuitem">';
+                                                                appending+='        <p class="slds-truncate" id="editbtn" onclick=showEditModal("'+result[i].Name+'","'+result[i].Flavour__c+'","'+result[i].Email__c+'","'+result[i].Id+'")>Edit</p>';
+                                                                appending+='      </a>';
+                                                                appending+='    </li>';
+                                                                appending+='  <li class="slds-dropdown__item">';
+                                                                    appending+='    <a href="#void" role="menuitem">';
+                                                                        appending+='      <p class="slds-truncate" id="deletebtn" onclick="shoedelModal(\''+result[i].Id+'\')">Delete</p>';
+                                                                        appending+='    </a>';
+                                                                        appending+='  </li>';
+                                                                        appending+='</ul>';
+                                                                        appending+='</div>';
+                                                                        appending+='</div>';
+                                
+                                                                        appending+='</td></tr>';
+                            }
+                            $("#tableBody").append(appending);
+                            scrollHeight =scrollHeight + 150;                            
                                 ScrollFunction();
                             }else{
                                 isScrollRun = false;
@@ -265,16 +283,46 @@ vfp
                     {escape: true}
                 );
             }
-            //     function ScrollFunction(){
-            //     $("#baskinDiv").scroll(function () {
-            //         if($(this).scrollTop() != 0 && $(this).scrollTop() > scrollHeight && $(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight- 50 && isScrollRun){   
-            //             offSetVal = offSetVal+15;
+            function ScrollFunction(){
+                $("#baskinDiv").scroll(function () {
+                    if($(this).scrollTop() != 0 && $(this).scrollTop() > scrollHeight && $(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight- 50 && isScrollRun){   
+                        offSetVal = offSetVal+15;
                         
-            //             displayRecords();                      
-            //         }
-            //         isScrollRun = true;
-            //     });
-            //  }
+                        displayRecords();                      
+                    }
+                    isScrollRun = true;
+                });
+            }
+
+            function MailSent(){
+                
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.BaskinController.emailsentmethod}',
+                        function(result, event)
+                            {
+                                $('#sucessalert').show();
+                                $('#toastId').removeClass('slds-theme_error');
+                                $('#toastId').addClass('slds-theme_success');
+                                $('#tostMsgId').html('succesfully added records');
+                                $("#spinner").show();
+                                setTimeout(function(){
+                                    $('#sucessalert').hide();
+                                    $("#spinner").hide();
+                                }, 2000);
+                            },
+                    {escape: true}  
+                );
+
+            }           
+            function uncheckBtn(){ 
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.BaskinController.uncheck}',
+                    function(result, event){
+                        }, 
+                    {escape: true}
+                );
+
+            }
             </script>
         </head>
         <body>
@@ -325,6 +373,8 @@ vfp
                                 <ul class="slds-button-group-list">
                                     <li>
                                         <button class="slds-button slds-button_brand" onclick="showModal()">New order</button> 
+                                        <button class="slds-button slds-button_brand" onclick="MailSent()">Send mail</button> 
+                                        <button class="slds-button slds-button_brand" onclick="uncheckBtn()">Reset mail</button> 
                                     </li>
                                     <li>
                                     </li>
@@ -400,6 +450,12 @@ vfp
                                 Email
                             </th>
                             <th>
+                            	Scheduled
+                            </th>
+                            <th>
+                                mail sent
+                            </th>
+                            <th>
                                 Action
                             </th>
                         </tr>
@@ -444,170 +500,3 @@ vfp
         </body>
     </html>
 </apex:page>
-
-
-
-
-apex class
-/**
- * @File Name          : BaskinController.cls
- * @Description        : 
- * @Author             : Rasagna Varma 
- * @Group              : 
- * @Last Modified By   : Rasagna Varma 
- * @Last Modified On   : 29/8/2019, 2:11:12 PM
- * @Modification Log   : 
- *==============================================================================
- * Ver         Date                     Author      		      Modification
- *==============================================================================
- * 1.0    22/8/2019, 3:05:11 PM   Rasagna Varma      Initial Version
-**/
-global with sharing class BaskinController {
-    public integer offSet{get;set;}
-    public integer limitSize{get;set;}
-    public integer totalrecords{get;set;}
-    public string req {get;set;}
-    public BaskinController()
-    {
-        
-        totalrecords=[select count() from Baskin__c ]; 
-        this.limitSize=5;
-        this.offSet=0;
-    }
-    
-    @RemoteAction
-    global static list<Baskin__c> getDisplayList(Integer offsetVal){
-        // BaskinController req=(BaskinController)JSON.deserializeStrict(BaskinController, BaskinController.class);
-        List<Baskin__c> allRecords = new List<Baskin__c>();
-        allRecords=[select Name,Flavour__c,Email__c,Id from Baskin__c order by Id asc  ];
-        return allRecords;
-    }
-    // limit 15 OFFSET : offsetVal
-    
-    @RemoteAction
-    global static list<SelectOption> getFlavours(){
-        
-        List<SelectOption> options = new List<SelectOption>();
-        Schema.DescribeFieldResult Flavorget = Baskin__c.Flavour__c.getDescribe();
-        List<Schema.PicklistEntry> listFlavours = Flavorget.getPicklistValues();
-        
-        for(Schema.PicklistEntry flavour :listFlavours)
-        {
-            options.add(new SelectOption(flavour.getLabel(), flavour.getValue())); 
-        }
-        return options;
-    }
-    
-    @RemoteAction
-    global static void insertingNew(string name,string flavour, String email){
-        Baskin__c robins=new Baskin__c();
-        robins.Name=name;
-        robins.Flavour__c=flavour;
-        robins.Email__c=email;
-        insert robins;
-    }
-    
-    
-    
-    
-    
-    @RemoteAction
-    global static void getDeleteRecord(String Id){
-        
-        if(String.isNotBlank(Id))
-            delete [select Id from Baskin__c where Id= :Id];
-    }
-    
-    @RemoteAction
-    global static  boolean  getEditList(string name,string flavour, String email,string id){
-        boolean result=false;
-        Baskin__c edit=[select Name,Flavour__c,Email__c,Id from Baskin__c  where Id=:id];
-        edit.Name=name;
-        edit.Flavour__c=flavour;
-        edit.Email__c=email;
-        try {
-            
-            update edit;
-            result=true;
-        } 
-        catch(DmlException e) 
-        {
-            System.debug('The following exception has occurred: ' + e.getMessage());  
-            result=false;
-        }
-        
-        return result;
-    }
-    
-   /* public void scrooltop(){
-        offset=0;
-        limitsize=5;
-    }
-    public void scrooldown(){
-        offset+=limitsize;
-    }
-    public void scroolup(){
-        offset-=limitsize;
-    }
-    
-    public  void scroollast(){
-        offset=totalrecords-math.mod(totalrecords,limitsize);
-    }*/
-    
-    
-}
-
-
-
-trigger
-/**
- * @File Name          : BaskinTrigger.trigger
- * @Description        : 
- * @Author             : Rasagna Varma 
- * @Group              : 
- * @Last Modified By   : Rasagna Varma 
- * @Last Modified On   : 29/8/2019, 2:53:23 PM
- * @Modification Log   : 
- *==============================================================================
- * Ver         Date                     Author      		      Modification
- *==============================================================================
- * 1.0    29/8/2019, 2:07:18 PM   Rasagna Varma      Initial Version
-**/
-trigger BaskinTrigger on Baskin__c (before insert, before update) 
-{
-     Map<String, Baskin__c> BaskinMap = new Map<String, Contact>();
-    for (Baskin__c Contact : System.Trigger.new) {
-		
-        // Make sure we don't treat an email address that  
-        // isn't changing during an update as a duplicate.  
-    
-        if ((Baskin__c.Email__c != null) &&
-                (System.Trigger.isInsert ||
-                (Baskin__c.Email__c != 
-                    System.Trigger.oldMap.get(Baskin__c.Id).Email__c))) {
-		
-            // Make sure another new Contact isn't also a duplicate  
-    
-            if (BaskinMap.containsKey(Baskin__c.Email__c)) {
-                Baskin__c.Email__c.addError('Another new Contact has the '
-                                    + 'same email address.');
-            } else {
-                BaskinMap.put(Baskin__c.Email__c, Baskin__c);
-            }
-       }
-    }
-	
-    // Using a single database query, find all the Contacts in  
-    
-    // the database that have the same email address as any  
-    
-    // of the Contacts being inserted or updated.  
-    
-    for (Baskin__c Baskin : [SELECT Email__C FROM Baskin__c
-                      WHERE Email__c IN :BaskinMap.KeySet()]) {
-        Baskin__c newBaskin = BaskinMap.get(Baskin__c.Email__c);
-        newBaskin.Email__c.addError('A Contact with this email '
-                               + 'address already exists.');
-    }
-  }
-}
