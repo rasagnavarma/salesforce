@@ -1,0 +1,43 @@
+/**
+* @File Name          : BaskinTrigger.trigger
+* @Description        : 
+* @Author             : Rasagna Varma 
+* @Group              : 
+* @Last Modified By   : Rasagna Varma 
+* @Last Modified On   : 6/9/2019, 3:27:56 PM
+* @Modification Log   : 
+*==============================================================================
+* Ver         Date                     Author      		      Modification
+*==============================================================================
+* 1.0    29/8/2019, 2:07:18 PM   Rasagna Varma      Initial Version
+**/
+trigger BaskinTrigger on Baskin__c (before insert, before update) 
+{
+    set<string> BaskinSet=new set<string>();
+    for(Baskin__c Baskin:trigger.New){
+        BaskinSet.add(Baskin.Email__c);
+        
+    }
+    list<string> BaskinSet2=new list<string>();
+    for(Baskin__c BaskinList:[SELECT Email__c FROM Baskin__c where Email__c IN :BaskinSet]){
+        BaskinSet2.add(BaskinList.Email__c);
+    }
+    if(trigger.isBefore){
+        
+        for(Baskin__c c:trigger.new){
+            
+            if(trigger.isInsert ){
+                
+                if(BaskinSet2.contains(c.Email__c)){
+                    
+                    DateTime nowDT=System.now();
+                    String formatted=nowDT.format('/dd/MM/yyyy');
+                    Integer Index = c.Email__c.indexof('@');
+                    // System.debug('0'+c.Email__c.substring(0,Index) + formatted + c.Email__c.substring(Index+1,c.Email__c.length()));
+                    c.Email__c = c.Email__c.substring(0,Index) + formatted + c.Email__c.substring(Index,c.Email__c.length());
+                }
+                
+            }  
+        }
+    }
+}
